@@ -1,0 +1,515 @@
+WARNING:tensorflow:From /media/shahd/dcffe8cc-c40a-417c-b4ce-1a35d2c675e7/dreamingcar/dreamingcar-master/vae/vae.py:52: dense (from tensorflow.python.layers.core) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use keras.layers.dense instead.
+WARNING:tensorflow:From /media/shahd/dcffe8cc-c40a-417c-b4ce-1a35d2c675e7/dreamingcar/dreamingcar-master/vae/vae.py:63: conv2d_transpose (from tensorflow.python.layers.convolutional) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use keras.layers.conv2d_transpose instead.
+2019-06-14 01:10:19.763186: I tensorflow/core/platform/cpu_feature_guard.cc:141] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+2019-06-14 01:10:19.795206: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 3600000000 Hz
+2019-06-14 01:10:19.795893: I tensorflow/compiler/xla/service/service.cc:150] XLA service 0x55dce437b010 executing computations on platform Host. Devices:
+2019-06-14 01:10:19.795912: I tensorflow/compiler/xla/service/service.cc:158]   StreamExecutor device (0): <undefined>, <undefined>
+2019-06-14 01:10:19.804855: E tensorflow/stream_executor/cuda/cuda_driver.cc:300] failed call to cuInit: CUDA_ERROR_NO_DEVICE: no CUDA-capable device is detected
+2019-06-14 01:10:19.804888: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:161] retrieving CUDA diagnostic information for host: shahd
+2019-06-14 01:10:19.804894: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:168] hostname: shahd
+2019-06-14 01:10:19.804916: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:192] libcuda reported version is: 418.56.0
+2019-06-14 01:10:19.804931: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:196] kernel reported version is: 418.56.0
+2019-06-14 01:10:19.804936: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:303] kernel version seems to match DSO: 418.56.0
+1000
+2000
+3000
+4000
+5000
+6000
+7000
+(TF) shahd@shahd:/media/shahd/dcffe8cc-c40a-417c-b4ce-1a35d2c675e7/dreamingcar/dreamingcar-master$ nvidia-smi
+Fri Jun 14 13:13:39 2019       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 418.56       Driver Version: 418.56       CUDA Version: 10.1     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|===============================+======================+======================|
+|   0  TITAN Xp            Off  | 00000000:01:00.0  On |                  N/A |
+| 23%   36C    P5    22W / 250W |    536MiB / 12192MiB |      0%      Default |
++-------------------------------+----------------------+----------------------+
+|   1  GeForce GTX 105...  Off  | 00000000:03:00.0 Off |                  N/A |
+| 25%   33C    P8    N/A /  75W |      2MiB /  4040MiB |      0%      Default |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                       GPU Memory |
+|  GPU       PID   Type   Process name                             Usage      |
+|=============================================================================|
+|    0      1534      G   /usr/lib/xorg/Xorg                            26MiB |
+|    0      1671      G   /usr/bin/gnome-shell                          51MiB |
+|    0      2567      G   /usr/lib/firefox/firefox                       3MiB |
+|    0      5359      G   /usr/lib/xorg/Xorg                           185MiB |
+|    0      5475      G   /usr/bin/gnome-shell                         207MiB |
+|    0     19203      G   /proc/self/exe                                58MiB |
++-----------------------------------------------------------------------------+
+(TF) shahd@shahd:/media/shahd/dcffe8cc-c40a-417c-b4ce-1a35d2c675e7/dreamingcar/dreamingcar-master$ clear
+
+(TF) shahd@shahd:/media/shahd/dcffe8cc-c40a-417c-b4ce-1a35d2c675e7/dreamingcar/dreamingcar-master$ python rnn_train.py 
+model using gpu
+WARNING:tensorflow:From /home/shahd/.conda/envs/TF/lib/python3.7/site-packages/tensorflow/python/framework/op_def_library.py:263: colocate_with (from tensorflow.python.framework.ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Colocations handled automatically by placer.
+
+WARNING: The TensorFlow contrib module will not be included in TensorFlow 2.0.
+For more information, please see:
+  * https://github.com/tensorflow/community/blob/master/rfcs/20180907-contrib-sunset.md
+  * https://github.com/tensorflow/addons
+If you depend on functionality not listed there, please file an issue.
+
+input dropout mode = False
+output dropout mode = False
+recurrent dropout mode = False
+WARNING:tensorflow:From /home/shahd/.conda/envs/TF/lib/python3.7/site-packages/tensorflow/python/ops/math_ops.py:3066: to_int32 (from tensorflow.python.ops.math_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.cast instead.
+
+2019-06-14 13:14:15.243210: I tensorflow/core/platform/cpu_feature_guard.cc:141] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+2019-06-14 13:14:15.283266: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 3600000000 Hz
+2019-06-14 13:14:15.283970: I tensorflow/compiler/xla/service/service.cc:150] XLA service 0x56032efa5970 executing computations on platform Host. Devices:
+2019-06-14 13:14:15.283983: I tensorflow/compiler/xla/service/service.cc:158]   StreamExecutor device (0): <undefined>, <undefined>
+2019-06-14 13:14:15.387044: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2019-06-14 13:14:15.387716: I tensorflow/compiler/xla/service/service.cc:150] XLA service 0x56032eb412b0 executing computations on platform CUDA. Devices:
+2019-06-14 13:14:15.387729: I tensorflow/compiler/xla/service/service.cc:158]   StreamExecutor device (0): TITAN Xp, Compute Capability 6.1
+2019-06-14 13:14:15.388042: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1433] Found device 0 with properties: 
+name: TITAN Xp major: 6 minor: 1 memoryClockRate(GHz): 1.582
+pciBusID: 0000:01:00.0
+totalMemory: 11.91GiB freeMemory: 11.23GiB
+2019-06-14 13:14:15.388053: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1512] Adding visible gpu devices: 0
+2019-06-14 13:14:15.389478: I tensorflow/core/common_runtime/gpu/gpu_device.cc:984] Device interconnect StreamExecutor with strength 1 edge matrix:
+2019-06-14 13:14:15.389487: I tensorflow/core/common_runtime/gpu/gpu_device.cc:990]      0 
+2019-06-14 13:14:15.389494: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1003] 0:   N 
+2019-06-14 13:14:15.389957: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1115] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 10926 MB memory) -> physical GPU (device: 0, name: TITAN Xp, pci bus id: 0000:01:00.0, compute capability: 6.1)
+2019-06-14 13:14:19.806606: W tensorflow/core/framework/allocator.cc:124] Allocation of 63872000 exceeds 10% of system memory.
+2019-06-14 13:14:19.823711: W tensorflow/core/framework/allocator.cc:124] Allocation of 63872000 exceeds 10% of system memory.
+2019-06-14 13:14:20.009650: W tensorflow/core/framework/allocator.cc:124] Allocation of 63872000 exceeds 10% of system memory.
+2019-06-14 13:14:20.035555: W tensorflow/core/framework/allocator.cc:124] Allocation of 63872000 exceeds 10% of system memory.
+2019-06-14 13:14:22.507186: W tensorflow/core/framework/allocator.cc:124] Allocation of 63872000 exceeds 10% of system memory.
+2019-06-14 13:14:22.870469: I tensorflow/stream_executor/dso_loader.cc:152] successfully opened CUDA library libcublas.so.10.0 locally
+step: 20, lr: 0.001000, cost: 127.2652, z_cost: 1.3573, r_cost: 2.2559, train_time_taken: 14.3200
+step: 40, lr: 0.001000, cost: 148.5277, z_cost: 1.3618, r_cost: 6.2789, train_time_taken: 8.5021
+step: 60, lr: 0.000999, cost: 131.5444, z_cost: 1.3605, r_cost: 5.3505, train_time_taken: 8.5266
+step: 80, lr: 0.000999, cost: 132.7529, z_cost: 1.3573, r_cost: 5.0575, train_time_taken: 8.5281
+step: 100, lr: 0.000999, cost: 125.6200, z_cost: 1.3521, r_cost: 3.8028, train_time_taken: 8.5541
+step: 120, lr: 0.000999, cost: 140.3490, z_cost: 1.3588, r_cost: 4.5918, train_time_taken: 8.5361
+step: 140, lr: 0.000999, cost: 122.9911, z_cost: 1.3769, r_cost: 3.6126, train_time_taken: 8.5745
+step: 160, lr: 0.000998, cost: 125.6806, z_cost: 1.3559, r_cost: 4.5588, train_time_taken: 8.5345
+step: 180, lr: 0.000998, cost: 100.9182, z_cost: 1.3586, r_cost: 2.3446, train_time_taken: 8.5725
+step: 200, lr: 0.000998, cost: 102.4844, z_cost: 1.3664, r_cost: 3.3726, train_time_taken: 8.5452
+step: 220, lr: 0.000998, cost: 93.0734, z_cost: 1.3573, r_cost: 2.5096, train_time_taken: 8.5590
+step: 240, lr: 0.000998, cost: 85.5510, z_cost: 1.3791, r_cost: 1.4817, train_time_taken: 8.5825
+step: 260, lr: 0.000997, cost: 77.6961, z_cost: 1.3601, r_cost: 1.2725, train_time_taken: 8.6051
+step: 280, lr: 0.000997, cost: 69.7119, z_cost: 1.3495, r_cost: 0.8742, train_time_taken: 8.6528
+step: 300, lr: 0.000997, cost: 71.2097, z_cost: 1.3392, r_cost: 0.7633, train_time_taken: 8.6585
+step: 320, lr: 0.000997, cost: 67.1963, z_cost: 1.3303, r_cost: 0.6635, train_time_taken: 8.6291
+step: 340, lr: 0.000997, cost: 70.0012, z_cost: 1.3288, r_cost: 0.7371, train_time_taken: 8.7684
+step: 360, lr: 0.000996, cost: 70.4283, z_cost: 1.3256, r_cost: 0.6052, train_time_taken: 8.5955
+step: 380, lr: 0.000996, cost: 64.0786, z_cost: 1.3088, r_cost: 0.4820, train_time_taken: 8.6726
+step: 400, lr: 0.000996, cost: 67.6951, z_cost: 1.3079, r_cost: 0.5253, train_time_taken: 8.6551
+step: 420, lr: 0.000996, cost: 82.1625, z_cost: 1.2959, r_cost: 0.6797, train_time_taken: 8.5841
+step: 440, lr: 0.000996, cost: 65.0928, z_cost: 1.3012, r_cost: 0.5043, train_time_taken: 8.4410
+step: 460, lr: 0.000995, cost: 66.4288, z_cost: 1.2977, r_cost: 0.5020, train_time_taken: 8.5833
+step: 480, lr: 0.000995, cost: 67.1549, z_cost: 1.2925, r_cost: 0.4816, train_time_taken: 8.5713
+step: 500, lr: 0.000995, cost: 65.6321, z_cost: 1.2834, r_cost: 0.4735, train_time_taken: 8.6577
+step: 520, lr: 0.000995, cost: 65.5042, z_cost: 1.2816, r_cost: 0.4764, train_time_taken: 7.9902
+step: 540, lr: 0.000995, cost: 66.1475, z_cost: 1.2772, r_cost: 0.4566, train_time_taken: 7.6228
+step: 560, lr: 0.000994, cost: 64.0720, z_cost: 1.2714, r_cost: 0.4502, train_time_taken: 7.5734
+step: 580, lr: 0.000994, cost: 64.7247, z_cost: 1.2670, r_cost: 0.4612, train_time_taken: 7.5788
+step: 600, lr: 0.000994, cost: 64.4959, z_cost: 1.2615, r_cost: 0.4076, train_time_taken: 7.6011
+step: 620, lr: 0.000994, cost: 63.3133, z_cost: 1.2627, r_cost: 0.4032, train_time_taken: 7.7762
+step: 640, lr: 0.000994, cost: 63.0450, z_cost: 1.2496, r_cost: 0.3666, train_time_taken: 7.8324
+step: 660, lr: 0.000993, cost: 65.3755, z_cost: 1.2604, r_cost: 0.4101, train_time_taken: 7.7288
+step: 680, lr: 0.000993, cost: 63.2184, z_cost: 1.2545, r_cost: 0.3664, train_time_taken: 7.7292
+step: 700, lr: 0.000993, cost: 62.1423, z_cost: 1.2469, r_cost: 0.3960, train_time_taken: 7.7354
+step: 720, lr: 0.000993, cost: 63.8162, z_cost: 1.2459, r_cost: 0.3858, train_time_taken: 8.3585
+step: 740, lr: 0.000993, cost: 62.2857, z_cost: 1.2431, r_cost: 0.3593, train_time_taken: 8.0550
+step: 760, lr: 0.000993, cost: 62.2903, z_cost: 1.2346, r_cost: 0.3486, train_time_taken: 7.8876
+step: 780, lr: 0.000992, cost: 64.1717, z_cost: 1.2450, r_cost: 0.3848, train_time_taken: 8.2445
+step: 800, lr: 0.000992, cost: 63.2701, z_cost: 1.2510, r_cost: 0.3636, train_time_taken: 7.8036
+step: 820, lr: 0.000992, cost: 62.4121, z_cost: 1.2577, r_cost: 0.3740, train_time_taken: 7.7250
+step: 840, lr: 0.000992, cost: 67.5070, z_cost: 1.2580, r_cost: 0.4497, train_time_taken: 7.5711
+step: 860, lr: 0.000992, cost: 61.8929, z_cost: 1.2145, r_cost: 0.3087, train_time_taken: 7.6421
+step: 880, lr: 0.000991, cost: 65.0823, z_cost: 1.2303, r_cost: 0.3537, train_time_taken: 7.8006
+step: 900, lr: 0.000991, cost: 65.2215, z_cost: 1.2200, r_cost: 0.3459, train_time_taken: 7.7521
+step: 920, lr: 0.000991, cost: 60.9550, z_cost: 1.2184, r_cost: 0.2949, train_time_taken: 7.9131
+step: 940, lr: 0.000991, cost: 63.6568, z_cost: 1.2173, r_cost: 0.3380, train_time_taken: 7.5829
+step: 960, lr: 0.000991, cost: 62.9168, z_cost: 1.2124, r_cost: 0.3105, train_time_taken: 7.7168
+step: 980, lr: 0.000990, cost: 62.3446, z_cost: 1.2061, r_cost: 0.2999, train_time_taken: 7.5725
+step: 1000, lr: 0.000990, cost: 60.7388, z_cost: 1.2086, r_cost: 0.3004, train_time_taken: 7.6369
+step: 1020, lr: 0.000990, cost: 64.0966, z_cost: 1.2077, r_cost: 0.3289, train_time_taken: 7.6324
+step: 1040, lr: 0.000990, cost: 61.9261, z_cost: 1.1995, r_cost: 0.2892, train_time_taken: 7.5711
+step: 1060, lr: 0.000990, cost: 61.2651, z_cost: 1.2047, r_cost: 0.2992, train_time_taken: 7.5882
+step: 1080, lr: 0.000989, cost: 63.4449, z_cost: 1.2078, r_cost: 0.3071, train_time_taken: 7.5987
+step: 1100, lr: 0.000989, cost: 61.7301, z_cost: 1.2028, r_cost: 0.2909, train_time_taken: 7.6076
+step: 1120, lr: 0.000989, cost: 62.1328, z_cost: 1.2012, r_cost: 0.3042, train_time_taken: 7.5761
+step: 1140, lr: 0.000989, cost: 63.3745, z_cost: 1.2018, r_cost: 0.3049, train_time_taken: 7.8097
+step: 1160, lr: 0.000989, cost: 61.4244, z_cost: 1.2032, r_cost: 0.2825, train_time_taken: 7.6171
+step: 1180, lr: 0.000988, cost: 62.0625, z_cost: 1.2035, r_cost: 0.2855, train_time_taken: 7.7967
+step: 1200, lr: 0.000988, cost: 62.5576, z_cost: 1.2081, r_cost: 0.2970, train_time_taken: 8.0696
+step: 1220, lr: 0.000988, cost: 60.4964, z_cost: 1.2146, r_cost: 0.2771, train_time_taken: 7.7594
+step: 1240, lr: 0.000988, cost: 62.1795, z_cost: 1.2342, r_cost: 0.3097, train_time_taken: 7.7113
+step: 1260, lr: 0.000988, cost: 64.8854, z_cost: 1.2296, r_cost: 0.3548, train_time_taken: 7.6726
+step: 1280, lr: 0.000987, cost: 60.3928, z_cost: 1.1894, r_cost: 0.2707, train_time_taken: 7.4873
+step: 1300, lr: 0.000987, cost: 61.4397, z_cost: 1.1891, r_cost: 0.2773, train_time_taken: 7.5697
+step: 1320, lr: 0.000987, cost: 61.4122, z_cost: 1.1852, r_cost: 0.2800, train_time_taken: 7.5782
+step: 1340, lr: 0.000987, cost: 61.0278, z_cost: 1.1872, r_cost: 0.2730, train_time_taken: 7.6753
+step: 1360, lr: 0.000987, cost: 59.8668, z_cost: 1.1832, r_cost: 0.2666, train_time_taken: 7.5863
+step: 1380, lr: 0.000986, cost: 63.4456, z_cost: 1.1872, r_cost: 0.2958, train_time_taken: 7.6301
+step: 1400, lr: 0.000986, cost: 61.6112, z_cost: 1.1838, r_cost: 0.2764, train_time_taken: 7.7939
+step: 1420, lr: 0.000986, cost: 61.1838, z_cost: 1.1882, r_cost: 0.2715, train_time_taken: 8.5626
+step: 1440, lr: 0.000986, cost: 62.4039, z_cost: 1.1846, r_cost: 0.2876, train_time_taken: 7.9824
+step: 1460, lr: 0.000986, cost: 59.7068, z_cost: 1.1814, r_cost: 0.2531, train_time_taken: 8.2430
+step: 1480, lr: 0.000985, cost: 62.0659, z_cost: 1.1873, r_cost: 0.2846, train_time_taken: 8.7017
+step: 1500, lr: 0.000985, cost: 61.9791, z_cost: 1.1855, r_cost: 0.2846, train_time_taken: 8.2934
+step: 1520, lr: 0.000985, cost: 60.4407, z_cost: 1.1803, r_cost: 0.2538, train_time_taken: 7.6274
+step: 1540, lr: 0.000985, cost: 60.9608, z_cost: 1.1799, r_cost: 0.2722, train_time_taken: 7.7005
+step: 1560, lr: 0.000985, cost: 62.2775, z_cost: 1.1827, r_cost: 0.2808, train_time_taken: 7.7507
+step: 1580, lr: 0.000984, cost: 59.3791, z_cost: 1.1747, r_cost: 0.2515, train_time_taken: 7.6167
+step: 1600, lr: 0.000984, cost: 61.0206, z_cost: 1.1918, r_cost: 0.2633, train_time_taken: 7.7398
+step: 1620, lr: 0.000984, cost: 61.9808, z_cost: 1.1897, r_cost: 0.2802, train_time_taken: 7.9075
+step: 1640, lr: 0.000984, cost: 59.9788, z_cost: 1.2022, r_cost: 0.2657, train_time_taken: 7.8461
+step: 1660, lr: 0.000984, cost: 59.0463, z_cost: 1.2151, r_cost: 0.2564, train_time_taken: 8.0061
+step: 1680, lr: 0.000984, cost: 61.9589, z_cost: 1.2137, r_cost: 0.3148, train_time_taken: 7.9890
+step: 1700, lr: 0.000983, cost: 59.1385, z_cost: 1.1726, r_cost: 0.2420, train_time_taken: 7.5231
+step: 1720, lr: 0.000983, cost: 59.8740, z_cost: 1.1761, r_cost: 0.2558, train_time_taken: 7.7820
+step: 1740, lr: 0.000983, cost: 61.0454, z_cost: 1.1762, r_cost: 0.2665, train_time_taken: 7.8479
+step: 1760, lr: 0.000983, cost: 58.5328, z_cost: 1.1676, r_cost: 0.2379, train_time_taken: 7.6660
+step: 1780, lr: 0.000983, cost: 58.5687, z_cost: 1.1663, r_cost: 0.2439, train_time_taken: 7.6319
+step: 1800, lr: 0.000982, cost: 59.7164, z_cost: 1.1683, r_cost: 0.2517, train_time_taken: 7.6835
+step: 1820, lr: 0.000982, cost: 60.2262, z_cost: 1.1760, r_cost: 0.2612, train_time_taken: 7.6548
+step: 1840, lr: 0.000982, cost: 58.5344, z_cost: 1.1702, r_cost: 0.2392, train_time_taken: 7.6311
+step: 1860, lr: 0.000982, cost: 60.8340, z_cost: 1.1780, r_cost: 0.2646, train_time_taken: 7.6402
+step: 1880, lr: 0.000982, cost: 59.3544, z_cost: 1.1716, r_cost: 0.2431, train_time_taken: 7.6659
+step: 1900, lr: 0.000981, cost: 60.1713, z_cost: 1.1705, r_cost: 0.2584, train_time_taken: 7.8252
+step: 1920, lr: 0.000981, cost: 60.7456, z_cost: 1.1652, r_cost: 0.2639, train_time_taken: 7.5860
+step: 1940, lr: 0.000981, cost: 58.1395, z_cost: 1.1716, r_cost: 0.2410, train_time_taken: 7.6195
+step: 1960, lr: 0.000981, cost: 60.3068, z_cost: 1.1720, r_cost: 0.2534, train_time_taken: 7.6020
+step: 1980, lr: 0.000981, cost: 59.7600, z_cost: 1.1646, r_cost: 0.2555, train_time_taken: 7.7458
+step: 2000, lr: 0.000980, cost: 57.9262, z_cost: 1.1681, r_cost: 0.2327, train_time_taken: 7.9080
+step: 2020, lr: 0.000980, cost: 57.3776, z_cost: 1.1687, r_cost: 0.2345, train_time_taken: 7.8844
+step: 2040, lr: 0.000980, cost: 60.1996, z_cost: 1.1806, r_cost: 0.2606, train_time_taken: 7.6198
+step: 2060, lr: 0.000980, cost: 58.3259, z_cost: 1.1821, r_cost: 0.2408, train_time_taken: 7.6040
+step: 2080, lr: 0.000980, cost: 59.0929, z_cost: 1.2115, r_cost: 0.2515, train_time_taken: 7.6183
+step: 2100, lr: 0.000979, cost: 59.2367, z_cost: 1.1941, r_cost: 0.2741, train_time_taken: 7.5756
+step: 2120, lr: 0.000979, cost: 57.8386, z_cost: 1.1624, r_cost: 0.2309, train_time_taken: 7.5451
+step: 2140, lr: 0.000979, cost: 59.5468, z_cost: 1.1634, r_cost: 0.2481, train_time_taken: 7.7708
+step: 2160, lr: 0.000979, cost: 60.0065, z_cost: 1.1674, r_cost: 0.2535, train_time_taken: 7.6953
+step: 2180, lr: 0.000979, cost: 58.1085, z_cost: 1.1604, r_cost: 0.2280, train_time_taken: 7.7792
+step: 2200, lr: 0.000978, cost: 59.0126, z_cost: 1.1588, r_cost: 0.2335, train_time_taken: 7.6304
+step: 2220, lr: 0.000978, cost: 60.5664, z_cost: 1.1657, r_cost: 0.2567, train_time_taken: 7.8711
+step: 2240, lr: 0.000978, cost: 58.7139, z_cost: 1.1644, r_cost: 0.2454, train_time_taken: 7.7278
+step: 2260, lr: 0.000978, cost: 59.5841, z_cost: 1.1630, r_cost: 0.2457, train_time_taken: 7.8979
+step: 2280, lr: 0.000978, cost: 58.0572, z_cost: 1.1593, r_cost: 0.2412, train_time_taken: 7.7203
+step: 2300, lr: 0.000977, cost: 57.5386, z_cost: 1.1670, r_cost: 0.2299, train_time_taken: 7.6009
+step: 2320, lr: 0.000977, cost: 57.2719, z_cost: 1.1625, r_cost: 0.2221, train_time_taken: 7.8532
+step: 2340, lr: 0.000977, cost: 60.3529, z_cost: 1.1599, r_cost: 0.2556, train_time_taken: 7.9506
+step: 2360, lr: 0.000977, cost: 58.1827, z_cost: 1.1565, r_cost: 0.2306, train_time_taken: 7.6907
+step: 2380, lr: 0.000977, cost: 58.5686, z_cost: 1.1579, r_cost: 0.2400, train_time_taken: 7.6420
+step: 2400, lr: 0.000977, cost: 58.8448, z_cost: 1.1657, r_cost: 0.2403, train_time_taken: 7.7261
+step: 2420, lr: 0.000976, cost: 59.1584, z_cost: 1.1654, r_cost: 0.2370, train_time_taken: 7.5661
+step: 2440, lr: 0.000976, cost: 57.4204, z_cost: 1.1678, r_cost: 0.2353, train_time_taken: 7.6350
+step: 2460, lr: 0.000976, cost: 57.5685, z_cost: 1.1678, r_cost: 0.2322, train_time_taken: 7.9702
+step: 2480, lr: 0.000976, cost: 57.4609, z_cost: 1.1758, r_cost: 0.2295, train_time_taken: 7.7494
+step: 2500, lr: 0.000976, cost: 59.1153, z_cost: 1.2028, r_cost: 0.2399, train_time_taken: 7.8695
+step: 2520, lr: 0.000975, cost: 58.4499, z_cost: 1.1809, r_cost: 0.2560, train_time_taken: 7.8709
+step: 2540, lr: 0.000975, cost: 55.7444, z_cost: 1.1527, r_cost: 0.2167, train_time_taken: 7.4843
+step: 2560, lr: 0.000975, cost: 56.5428, z_cost: 1.1594, r_cost: 0.2187, train_time_taken: 7.7696
+step: 2580, lr: 0.000975, cost: 58.5016, z_cost: 1.1603, r_cost: 0.2383, train_time_taken: 7.7152
+step: 2600, lr: 0.000975, cost: 56.8788, z_cost: 1.1568, r_cost: 0.2223, train_time_taken: 7.7437
+step: 2620, lr: 0.000974, cost: 56.7551, z_cost: 1.1627, r_cost: 0.2195, train_time_taken: 7.7371
+step: 2640, lr: 0.000974, cost: 56.7687, z_cost: 1.1555, r_cost: 0.2313, train_time_taken: 7.6771
+step: 2660, lr: 0.000974, cost: 56.0980, z_cost: 1.1480, r_cost: 0.2158, train_time_taken: 7.7556
+step: 2680, lr: 0.000974, cost: 57.8253, z_cost: 1.1636, r_cost: 0.2267, train_time_taken: 7.8487
+step: 2700, lr: 0.000974, cost: 55.4834, z_cost: 1.1515, r_cost: 0.2184, train_time_taken: 7.6756
+step: 2720, lr: 0.000973, cost: 56.9606, z_cost: 1.1493, r_cost: 0.2294, train_time_taken: 7.6375
+step: 2740, lr: 0.000973, cost: 56.7822, z_cost: 1.1561, r_cost: 0.2161, train_time_taken: 7.9172
+step: 2760, lr: 0.000973, cost: 57.6781, z_cost: 1.1627, r_cost: 0.2403, train_time_taken: 7.6757
+step: 2780, lr: 0.000973, cost: 56.3643, z_cost: 1.1529, r_cost: 0.2156, train_time_taken: 7.7133
+step: 2800, lr: 0.000973, cost: 57.0896, z_cost: 1.1512, r_cost: 0.2236, train_time_taken: 7.7052
+step: 2820, lr: 0.000972, cost: 58.2873, z_cost: 1.1593, r_cost: 0.2389, train_time_taken: 7.6634
+step: 2840, lr: 0.000972, cost: 56.0433, z_cost: 1.1500, r_cost: 0.2054, train_time_taken: 7.6776
+step: 2860, lr: 0.000972, cost: 56.5011, z_cost: 1.1616, r_cost: 0.2190, train_time_taken: 7.6723
+step: 2880, lr: 0.000972, cost: 56.6798, z_cost: 1.1556, r_cost: 0.2223, train_time_taken: 7.8467
+step: 2900, lr: 0.000972, cost: 57.0261, z_cost: 1.1694, r_cost: 0.2200, train_time_taken: 7.6697
+step: 2920, lr: 0.000972, cost: 56.1480, z_cost: 1.1926, r_cost: 0.2142, train_time_taken: 7.7152
+step: 2940, lr: 0.000971, cost: 58.0293, z_cost: 1.1694, r_cost: 0.2491, train_time_taken: 7.7440
+step: 2960, lr: 0.000971, cost: 56.4783, z_cost: 1.1452, r_cost: 0.2141, train_time_taken: 8.0906
+step: 2980, lr: 0.000971, cost: 56.9788, z_cost: 1.1451, r_cost: 0.2166, train_time_taken: 8.3366
+step: 3000, lr: 0.000971, cost: 57.5505, z_cost: 1.1556, r_cost: 0.2312, train_time_taken: 8.3270
+step: 3020, lr: 0.000971, cost: 55.4186, z_cost: 1.1490, r_cost: 0.2065, train_time_taken: 7.7289
+step: 3040, lr: 0.000970, cost: 57.2916, z_cost: 1.1559, r_cost: 0.2231, train_time_taken: 7.8967
+step: 3060, lr: 0.000970, cost: 56.1932, z_cost: 1.1467, r_cost: 0.2204, train_time_taken: 7.8866
+step: 3080, lr: 0.000970, cost: 55.5418, z_cost: 1.1445, r_cost: 0.2094, train_time_taken: 7.9563
+step: 3100, lr: 0.000970, cost: 57.3363, z_cost: 1.1497, r_cost: 0.2199, train_time_taken: 7.9599
+step: 3120, lr: 0.000970, cost: 56.9798, z_cost: 1.1477, r_cost: 0.2260, train_time_taken: 7.7978
+step: 3140, lr: 0.000969, cost: 56.2560, z_cost: 1.1404, r_cost: 0.2131, train_time_taken: 7.5920
+step: 3160, lr: 0.000969, cost: 56.3606, z_cost: 1.1652, r_cost: 0.2094, train_time_taken: 7.6110
+step: 3180, lr: 0.000969, cost: 57.0287, z_cost: 1.1544, r_cost: 0.2220, train_time_taken: 7.7049
+step: 3200, lr: 0.000969, cost: 57.0821, z_cost: 1.1556, r_cost: 0.2197, train_time_taken: 7.8367
+step: 3220, lr: 0.000969, cost: 56.9057, z_cost: 1.1565, r_cost: 0.2159, train_time_taken: 7.7095
+step: 3240, lr: 0.000968, cost: 56.2136, z_cost: 1.1503, r_cost: 0.2204, train_time_taken: 8.2846
+step: 3260, lr: 0.000968, cost: 57.5923, z_cost: 1.1554, r_cost: 0.2213, train_time_taken: 8.2717
+step: 3280, lr: 0.000968, cost: 54.1638, z_cost: 1.1533, r_cost: 0.1999, train_time_taken: 8.4854
+step: 3300, lr: 0.000968, cost: 55.8399, z_cost: 1.1568, r_cost: 0.2096, train_time_taken: 8.0543
+step: 3320, lr: 0.000968, cost: 56.3474, z_cost: 1.1612, r_cost: 0.2097, train_time_taken: 7.6949
+step: 3340, lr: 0.000967, cost: 55.6956, z_cost: 1.1884, r_cost: 0.2040, train_time_taken: 8.1041
+step: 3360, lr: 0.000967, cost: 55.6334, z_cost: 1.1573, r_cost: 0.2286, train_time_taken: 8.1252
+step: 3380, lr: 0.000967, cost: 55.9103, z_cost: 1.1433, r_cost: 0.2076, train_time_taken: 7.8638
+step: 3400, lr: 0.000967, cost: 57.1322, z_cost: 1.1500, r_cost: 0.2186, train_time_taken: 7.7809
+step: 3420, lr: 0.000967, cost: 56.1236, z_cost: 1.1417, r_cost: 0.2153, train_time_taken: 8.0688
+step: 3440, lr: 0.000967, cost: 57.3725, z_cost: 1.1465, r_cost: 0.2154, train_time_taken: 8.1237
+step: 3460, lr: 0.000966, cost: 56.7625, z_cost: 1.1539, r_cost: 0.2138, train_time_taken: 7.9196
+step: 3480, lr: 0.000966, cost: 58.1452, z_cost: 1.1484, r_cost: 0.2333, train_time_taken: 7.9611
+step: 3500, lr: 0.000966, cost: 55.4938, z_cost: 1.1410, r_cost: 0.1996, train_time_taken: 8.3122
+step: 3520, lr: 0.000966, cost: 55.6485, z_cost: 1.1474, r_cost: 0.1995, train_time_taken: 7.8779
+step: 3540, lr: 0.000966, cost: 54.9860, z_cost: 1.1475, r_cost: 0.2067, train_time_taken: 7.5963
+step: 3560, lr: 0.000965, cost: 56.1498, z_cost: 1.1496, r_cost: 0.2072, train_time_taken: 7.5997
+step: 3580, lr: 0.000965, cost: 54.7607, z_cost: 1.1483, r_cost: 0.1954, train_time_taken: 7.6735
+step: 3600, lr: 0.000965, cost: 55.5105, z_cost: 1.1414, r_cost: 0.2072, train_time_taken: 7.5967
+step: 3620, lr: 0.000965, cost: 55.0626, z_cost: 1.1505, r_cost: 0.2018, train_time_taken: 7.8433
+step: 3640, lr: 0.000965, cost: 53.9695, z_cost: 1.1470, r_cost: 0.1917, train_time_taken: 8.5461
+step: 3660, lr: 0.000964, cost: 55.1191, z_cost: 1.1385, r_cost: 0.2040, train_time_taken: 8.6289
+step: 3680, lr: 0.000964, cost: 56.0402, z_cost: 1.1428, r_cost: 0.2152, train_time_taken: 8.7038
+step: 3700, lr: 0.000964, cost: 53.1811, z_cost: 1.1379, r_cost: 0.1872, train_time_taken: 8.6722
+step: 3720, lr: 0.000964, cost: 55.3015, z_cost: 1.1427, r_cost: 0.2088, train_time_taken: 8.6334
+step: 3740, lr: 0.000964, cost: 55.8538, z_cost: 1.1553, r_cost: 0.2057, train_time_taken: 8.6340
+step: 3760, lr: 0.000963, cost: 55.3123, z_cost: 1.1771, r_cost: 0.2016, train_time_taken: 8.6483
+step: 3780, lr: 0.000963, cost: 53.8297, z_cost: 1.1484, r_cost: 0.2132, train_time_taken: 8.6617
+step: 3800, lr: 0.000963, cost: 54.4516, z_cost: 1.1386, r_cost: 0.1909, train_time_taken: 8.5009
+step: 3820, lr: 0.000963, cost: 54.3208, z_cost: 1.1437, r_cost: 0.1971, train_time_taken: 8.6361
+step: 3840, lr: 0.000963, cost: 54.6836, z_cost: 1.1425, r_cost: 0.2080, train_time_taken: 8.6333
+step: 3860, lr: 0.000963, cost: 52.4984, z_cost: 1.1377, r_cost: 0.1789, train_time_taken: 8.6886
+step: 3880, lr: 0.000962, cost: 54.6598, z_cost: 1.1393, r_cost: 0.1957, train_time_taken: 8.6474
+step: 3900, lr: 0.000962, cost: 54.0983, z_cost: 1.1390, r_cost: 0.2020, train_time_taken: 8.6444
+step: 3920, lr: 0.000962, cost: 56.6670, z_cost: 1.1413, r_cost: 0.2154, train_time_taken: 8.6555
+step: 3940, lr: 0.000962, cost: 55.3255, z_cost: 1.1466, r_cost: 0.1964, train_time_taken: 8.6797
+step: 3960, lr: 0.000962, cost: 56.1751, z_cost: 1.1483, r_cost: 0.2190, train_time_taken: 8.6745
+step: 3980, lr: 0.000961, cost: 54.7383, z_cost: 1.1396, r_cost: 0.2006, train_time_taken: 8.6873
+step: 4000, lr: 0.000961, cost: 55.3268, z_cost: 1.1393, r_cost: 0.1943, train_time_taken: 8.6594
+step: 4020, lr: 0.000961, cost: 55.0278, z_cost: 1.1406, r_cost: 0.2108, train_time_taken: 8.6587
+step: 4040, lr: 0.000961, cost: 53.0197, z_cost: 1.1366, r_cost: 0.1804, train_time_taken: 8.6971
+step: 4060, lr: 0.000961, cost: 53.7904, z_cost: 1.1442, r_cost: 0.1940, train_time_taken: 8.6387
+step: 4080, lr: 0.000960, cost: 54.4005, z_cost: 1.1301, r_cost: 0.1977, train_time_taken: 8.6374
+step: 4100, lr: 0.000960, cost: 53.9513, z_cost: 1.1348, r_cost: 0.1893, train_time_taken: 8.6496
+step: 4120, lr: 0.000960, cost: 55.5047, z_cost: 1.1393, r_cost: 0.2001, train_time_taken: 8.6759
+step: 4140, lr: 0.000960, cost: 55.3029, z_cost: 1.1384, r_cost: 0.2048, train_time_taken: 8.6535
+step: 4160, lr: 0.000960, cost: 53.4804, z_cost: 1.1467, r_cost: 0.1833, train_time_taken: 8.6943
+step: 4180, lr: 0.000959, cost: 54.3426, z_cost: 1.1729, r_cost: 0.1897, train_time_taken: 8.6424
+step: 4200, lr: 0.000959, cost: 55.4176, z_cost: 1.1509, r_cost: 0.2159, train_time_taken: 8.6219
+step: 4220, lr: 0.000959, cost: 53.1844, z_cost: 1.1350, r_cost: 0.1828, train_time_taken: 8.4936
+step: 4240, lr: 0.000959, cost: 53.8536, z_cost: 1.1383, r_cost: 0.1872, train_time_taken: 8.6661
+step: 4260, lr: 0.000959, cost: 56.1243, z_cost: 1.1425, r_cost: 0.2126, train_time_taken: 8.6921
+step: 4280, lr: 0.000959, cost: 53.7438, z_cost: 1.1341, r_cost: 0.1853, train_time_taken: 8.6770
+step: 4300, lr: 0.000958, cost: 53.0881, z_cost: 1.1364, r_cost: 0.1802, train_time_taken: 8.6173
+step: 4320, lr: 0.000958, cost: 54.2879, z_cost: 1.1370, r_cost: 0.1975, train_time_taken: 8.6569
+step: 4340, lr: 0.000958, cost: 55.5195, z_cost: 1.1344, r_cost: 0.2001, train_time_taken: 8.6294
+step: 4360, lr: 0.000958, cost: 55.1583, z_cost: 1.1462, r_cost: 0.1970, train_time_taken: 8.6474
+step: 4380, lr: 0.000958, cost: 54.8826, z_cost: 1.1346, r_cost: 0.2039, train_time_taken: 8.6471
+step: 4400, lr: 0.000957, cost: 55.1898, z_cost: 1.1368, r_cost: 0.1957, train_time_taken: 8.6182
+step: 4420, lr: 0.000957, cost: 53.7012, z_cost: 1.1414, r_cost: 0.1855, train_time_taken: 8.6123
+step: 4440, lr: 0.000957, cost: 53.9121, z_cost: 1.1339, r_cost: 0.1946, train_time_taken: 8.6535
+step: 4460, lr: 0.000957, cost: 53.8098, z_cost: 1.1267, r_cost: 0.1860, train_time_taken: 8.6336
+step: 4480, lr: 0.000957, cost: 54.5475, z_cost: 1.1282, r_cost: 0.1893, train_time_taken: 8.5032
+step: 4500, lr: 0.000956, cost: 53.9902, z_cost: 1.1328, r_cost: 0.1924, train_time_taken: 8.0030
+step: 4520, lr: 0.000956, cost: 54.7853, z_cost: 1.1411, r_cost: 0.1900, train_time_taken: 8.6788
+step: 4540, lr: 0.000956, cost: 54.1895, z_cost: 1.1394, r_cost: 0.1867, train_time_taken: 8.6664
+step: 4560, lr: 0.000956, cost: 53.2249, z_cost: 1.1339, r_cost: 0.1880, train_time_taken: 8.5536
+step: 4580, lr: 0.000956, cost: 52.6236, z_cost: 1.1412, r_cost: 0.1723, train_time_taken: 8.5565
+step: 4600, lr: 0.000955, cost: 54.1478, z_cost: 1.1713, r_cost: 0.1868, train_time_taken: 8.5903
+step: 4620, lr: 0.000955, cost: 54.6648, z_cost: 1.1454, r_cost: 0.2064, train_time_taken: 8.5764
+step: 4640, lr: 0.000955, cost: 53.2467, z_cost: 1.1298, r_cost: 0.1862, train_time_taken: 8.3995
+step: 4660, lr: 0.000955, cost: 53.6877, z_cost: 1.1394, r_cost: 0.1840, train_time_taken: 8.5437
+step: 4680, lr: 0.000955, cost: 54.1338, z_cost: 1.1368, r_cost: 0.1976, train_time_taken: 8.5643
+step: 4700, lr: 0.000955, cost: 54.2820, z_cost: 1.1303, r_cost: 0.1859, train_time_taken: 8.5950
+step: 4720, lr: 0.000954, cost: 53.1805, z_cost: 1.1393, r_cost: 0.1795, train_time_taken: 8.5883
+step: 4740, lr: 0.000954, cost: 55.6971, z_cost: 1.1326, r_cost: 0.2061, train_time_taken: 8.5931
+step: 4760, lr: 0.000954, cost: 52.9974, z_cost: 1.1322, r_cost: 0.1798, train_time_taken: 8.5866
+step: 4780, lr: 0.000954, cost: 53.2622, z_cost: 1.1365, r_cost: 0.1845, train_time_taken: 8.5298
+step: 4800, lr: 0.000954, cost: 54.8888, z_cost: 1.1363, r_cost: 0.2038, train_time_taken: 8.6201
+step: 4820, lr: 0.000953, cost: 54.2077, z_cost: 1.1396, r_cost: 0.1830, train_time_taken: 8.6321
+step: 4840, lr: 0.000953, cost: 53.3634, z_cost: 1.1346, r_cost: 0.1845, train_time_taken: 8.7287
+step: 4860, lr: 0.000953, cost: 54.2361, z_cost: 1.1294, r_cost: 0.1930, train_time_taken: 8.6528
+step: 4880, lr: 0.000953, cost: 54.5340, z_cost: 1.1301, r_cost: 0.1925, train_time_taken: 8.7243
+step: 4900, lr: 0.000953, cost: 52.9414, z_cost: 1.1350, r_cost: 0.1845, train_time_taken: 8.6744
+step: 4920, lr: 0.000952, cost: 54.7516, z_cost: 1.1336, r_cost: 0.1941, train_time_taken: 8.6212
+step: 4940, lr: 0.000952, cost: 53.2651, z_cost: 1.1377, r_cost: 0.1808, train_time_taken: 8.6233
+step: 4960, lr: 0.000952, cost: 53.6165, z_cost: 1.1396, r_cost: 0.1925, train_time_taken: 8.6275
+step: 4980, lr: 0.000952, cost: 52.5885, z_cost: 1.1372, r_cost: 0.1785, train_time_taken: 8.7097
+step: 5000, lr: 0.000952, cost: 52.6786, z_cost: 1.1341, r_cost: 0.1744, train_time_taken: 8.7046
+step: 5020, lr: 0.000952, cost: 53.2758, z_cost: 1.1629, r_cost: 0.1793, train_time_taken: 8.5665
+step: 5040, lr: 0.000951, cost: 54.8889, z_cost: 1.1402, r_cost: 0.2043, train_time_taken: 8.6963
+step: 5060, lr: 0.000951, cost: 52.2107, z_cost: 1.1322, r_cost: 0.1725, train_time_taken: 8.5021
+step: 5080, lr: 0.000951, cost: 54.0802, z_cost: 1.1386, r_cost: 0.1888, train_time_taken: 8.5998
+step: 5100, lr: 0.000951, cost: 53.8207, z_cost: 1.1281, r_cost: 0.1901, train_time_taken: 8.5827
+step: 5120, lr: 0.000951, cost: 52.2195, z_cost: 1.1318, r_cost: 0.1791, train_time_taken: 8.7235
+step: 5140, lr: 0.000950, cost: 54.1947, z_cost: 1.1375, r_cost: 0.1898, train_time_taken: 8.6188
+step: 5160, lr: 0.000950, cost: 55.9963, z_cost: 1.1323, r_cost: 0.2134, train_time_taken: 8.3901
+step: 5180, lr: 0.000950, cost: 52.1175, z_cost: 1.1342, r_cost: 0.1724, train_time_taken: 8.5706
+step: 5200, lr: 0.000950, cost: 52.1079, z_cost: 1.1339, r_cost: 0.1693, train_time_taken: 8.5834
+step: 5220, lr: 0.000950, cost: 54.3934, z_cost: 1.1280, r_cost: 0.1914, train_time_taken: 8.5727
+step: 5240, lr: 0.000949, cost: 51.4278, z_cost: 1.1294, r_cost: 0.1708, train_time_taken: 8.5600
+step: 5260, lr: 0.000949, cost: 52.7446, z_cost: 1.1284, r_cost: 0.1793, train_time_taken: 8.5722
+step: 5280, lr: 0.000949, cost: 52.4283, z_cost: 1.1273, r_cost: 0.1831, train_time_taken: 8.5268
+step: 5300, lr: 0.000949, cost: 53.6242, z_cost: 1.1340, r_cost: 0.1840, train_time_taken: 8.5350
+step: 5320, lr: 0.000949, cost: 52.4306, z_cost: 1.1271, r_cost: 0.1772, train_time_taken: 8.5502
+step: 5340, lr: 0.000949, cost: 52.6682, z_cost: 1.1256, r_cost: 0.1790, train_time_taken: 8.5956
+step: 5360, lr: 0.000948, cost: 52.9021, z_cost: 1.1306, r_cost: 0.1726, train_time_taken: 8.5723
+step: 5380, lr: 0.000948, cost: 52.2612, z_cost: 1.1377, r_cost: 0.1723, train_time_taken: 8.5513
+step: 5400, lr: 0.000948, cost: 53.3204, z_cost: 1.1222, r_cost: 0.1877, train_time_taken: 8.5581
+step: 5420, lr: 0.000948, cost: 51.7163, z_cost: 1.1255, r_cost: 0.1684, train_time_taken: 8.5725
+step: 5440, lr: 0.000948, cost: 53.0944, z_cost: 1.1557, r_cost: 0.1823, train_time_taken: 8.5515
+step: 5460, lr: 0.000947, cost: 54.8263, z_cost: 1.1370, r_cost: 0.2043, train_time_taken: 8.5479
+step: 5480, lr: 0.000947, cost: 52.5061, z_cost: 1.1220, r_cost: 0.1723, train_time_taken: 8.4032
+step: 5500, lr: 0.000947, cost: 52.1505, z_cost: 1.1284, r_cost: 0.1703, train_time_taken: 8.5467
+step: 5520, lr: 0.000947, cost: 51.8300, z_cost: 1.1235, r_cost: 0.1792, train_time_taken: 8.5932
+step: 5540, lr: 0.000947, cost: 52.8599, z_cost: 1.1278, r_cost: 0.1742, train_time_taken: 8.5470
+step: 5560, lr: 0.000946, cost: 53.9723, z_cost: 1.1411, r_cost: 0.1871, train_time_taken: 8.5455
+step: 5580, lr: 0.000946, cost: 52.3203, z_cost: 1.1302, r_cost: 0.1799, train_time_taken: 8.5741
+step: 5600, lr: 0.000946, cost: 52.1458, z_cost: 1.1351, r_cost: 0.1644, train_time_taken: 8.5629
+step: 5620, lr: 0.000946, cost: 53.4046, z_cost: 1.1318, r_cost: 0.1799, train_time_taken: 8.5793
+step: 5640, lr: 0.000946, cost: 52.9655, z_cost: 1.1241, r_cost: 0.1827, train_time_taken: 8.5795
+step: 5660, lr: 0.000946, cost: 51.6229, z_cost: 1.1283, r_cost: 0.1728, train_time_taken: 8.5719
+step: 5680, lr: 0.000945, cost: 51.4838, z_cost: 1.1358, r_cost: 0.1634, train_time_taken: 8.5613
+step: 5700, lr: 0.000945, cost: 52.9434, z_cost: 1.1252, r_cost: 0.1803, train_time_taken: 8.5896
+step: 5720, lr: 0.000945, cost: 52.3753, z_cost: 1.1291, r_cost: 0.1695, train_time_taken: 8.5468
+step: 5740, lr: 0.000945, cost: 53.4859, z_cost: 1.1320, r_cost: 0.1851, train_time_taken: 8.5770
+step: 5760, lr: 0.000945, cost: 53.0766, z_cost: 1.1253, r_cost: 0.1835, train_time_taken: 8.5543
+step: 5780, lr: 0.000944, cost: 53.4230, z_cost: 1.1282, r_cost: 0.1778, train_time_taken: 8.5709
+step: 5800, lr: 0.000944, cost: 53.7147, z_cost: 1.1287, r_cost: 0.1787, train_time_taken: 8.5624
+step: 5820, lr: 0.000944, cost: 52.2893, z_cost: 1.1274, r_cost: 0.1766, train_time_taken: 8.5870
+step: 5840, lr: 0.000944, cost: 53.1289, z_cost: 1.1314, r_cost: 0.1749, train_time_taken: 8.5888
+step: 5860, lr: 0.000944, cost: 50.6937, z_cost: 1.1480, r_cost: 0.1663, train_time_taken: 8.5476
+step: 5880, lr: 0.000943, cost: 52.5886, z_cost: 1.1317, r_cost: 0.1877, train_time_taken: 8.5745
+step: 5900, lr: 0.000943, cost: 51.4701, z_cost: 1.1186, r_cost: 0.1629, train_time_taken: 8.3847
+step: 5920, lr: 0.000943, cost: 54.0636, z_cost: 1.1349, r_cost: 0.1804, train_time_taken: 8.5747
+step: 5940, lr: 0.000943, cost: 53.7089, z_cost: 1.1297, r_cost: 0.1869, train_time_taken: 8.5859
+step: 5960, lr: 0.000943, cost: 52.9689, z_cost: 1.1250, r_cost: 0.1780, train_time_taken: 8.5676
+step: 5980, lr: 0.000943, cost: 51.8584, z_cost: 1.1313, r_cost: 0.1642, train_time_taken: 8.5534
+step: 6000, lr: 0.000942, cost: 51.9962, z_cost: 1.1226, r_cost: 0.1817, train_time_taken: 8.5582
+step: 6020, lr: 0.000942, cost: 51.3197, z_cost: 1.1227, r_cost: 0.1687, train_time_taken: 8.5715
+step: 6040, lr: 0.000942, cost: 53.2494, z_cost: 1.1232, r_cost: 0.1769, train_time_taken: 8.5653
+step: 6060, lr: 0.000942, cost: 53.2989, z_cost: 1.1311, r_cost: 0.1863, train_time_taken: 8.5927
+step: 6080, lr: 0.000942, cost: 53.2727, z_cost: 1.1255, r_cost: 0.1852, train_time_taken: 8.5964
+step: 6100, lr: 0.000941, cost: 51.9308, z_cost: 1.1185, r_cost: 0.1638, train_time_taken: 8.5895
+step: 6120, lr: 0.000941, cost: 51.5411, z_cost: 1.1196, r_cost: 0.1698, train_time_taken: 8.5536
+step: 6140, lr: 0.000941, cost: 54.0524, z_cost: 1.1215, r_cost: 0.1840, train_time_taken: 8.5595
+step: 6160, lr: 0.000941, cost: 51.8603, z_cost: 1.1288, r_cost: 0.1684, train_time_taken: 8.5833
+step: 6180, lr: 0.000941, cost: 51.0741, z_cost: 1.1199, r_cost: 0.1782, train_time_taken: 8.5449
+step: 6200, lr: 0.000940, cost: 51.5949, z_cost: 1.1214, r_cost: 0.1702, train_time_taken: 8.5874
+step: 6220, lr: 0.000940, cost: 53.5325, z_cost: 1.1239, r_cost: 0.1870, train_time_taken: 8.5991
+step: 6240, lr: 0.000940, cost: 53.5603, z_cost: 1.1275, r_cost: 0.1841, train_time_taken: 8.5742
+step: 6260, lr: 0.000940, cost: 52.6481, z_cost: 1.1275, r_cost: 0.1754, train_time_taken: 8.5447
+step: 6280, lr: 0.000940, cost: 50.6257, z_cost: 1.1391, r_cost: 0.1571, train_time_taken: 8.5590
+step: 6300, lr: 0.000940, cost: 52.7759, z_cost: 1.1336, r_cost: 0.1910, train_time_taken: 8.5724
+step: 6320, lr: 0.000939, cost: 53.1573, z_cost: 1.1220, r_cost: 0.1763, train_time_taken: 8.4317
+step: 6340, lr: 0.000939, cost: 53.3573, z_cost: 1.1333, r_cost: 0.1774, train_time_taken: 8.5830
+step: 6360, lr: 0.000939, cost: 53.8815, z_cost: 1.1267, r_cost: 0.1853, train_time_taken: 8.5865
+step: 6380, lr: 0.000939, cost: 50.4970, z_cost: 1.1160, r_cost: 0.1618, train_time_taken: 8.5663
+step: 6400, lr: 0.000939, cost: 52.0420, z_cost: 1.1251, r_cost: 0.1725, train_time_taken: 8.5864
+step: 6420, lr: 0.000938, cost: 52.0984, z_cost: 1.1292, r_cost: 0.1800, train_time_taken: 8.5700
+step: 6440, lr: 0.000938, cost: 52.8718, z_cost: 1.1180, r_cost: 0.1706, train_time_taken: 8.5908
+step: 6460, lr: 0.000938, cost: 51.6111, z_cost: 1.1230, r_cost: 0.1711, train_time_taken: 8.5479
+step: 6480, lr: 0.000938, cost: 52.2807, z_cost: 1.1172, r_cost: 0.1765, train_time_taken: 8.5664
+step: 6500, lr: 0.000938, cost: 51.1972, z_cost: 1.1168, r_cost: 0.1604, train_time_taken: 8.5834
+step: 6520, lr: 0.000938, cost: 51.6585, z_cost: 1.1269, r_cost: 0.1660, train_time_taken: 8.5342
+step: 6540, lr: 0.000937, cost: 51.8598, z_cost: 1.1217, r_cost: 0.1727, train_time_taken: 8.5520
+step: 6560, lr: 0.000937, cost: 51.2035, z_cost: 1.1148, r_cost: 0.1642, train_time_taken: 8.5442
+step: 6580, lr: 0.000937, cost: 52.0436, z_cost: 1.1264, r_cost: 0.1695, train_time_taken: 8.5976
+step: 6600, lr: 0.000937, cost: 52.3633, z_cost: 1.1231, r_cost: 0.1747, train_time_taken: 8.5167
+step: 6620, lr: 0.000937, cost: 51.7224, z_cost: 1.1222, r_cost: 0.1654, train_time_taken: 8.8040
+step: 6640, lr: 0.000936, cost: 51.6743, z_cost: 1.1172, r_cost: 0.1681, train_time_taken: 8.8034
+step: 6660, lr: 0.000936, cost: 51.5573, z_cost: 1.1119, r_cost: 0.1695, train_time_taken: 8.8488
+step: 6680, lr: 0.000936, cost: 51.4702, z_cost: 1.1304, r_cost: 0.1663, train_time_taken: 8.8148
+step: 6700, lr: 0.000936, cost: 53.7972, z_cost: 1.1491, r_cost: 0.1845, train_time_taken: 8.8399
+step: 6720, lr: 0.000936, cost: 53.1428, z_cost: 1.1280, r_cost: 0.1846, train_time_taken: 8.8109
+step: 6740, lr: 0.000935, cost: 50.9641, z_cost: 1.1153, r_cost: 0.1585, train_time_taken: 8.6295
+step: 6760, lr: 0.000935, cost: 51.0256, z_cost: 1.1169, r_cost: 0.1628, train_time_taken: 8.7566
+step: 6780, lr: 0.000935, cost: 52.5653, z_cost: 1.1235, r_cost: 0.1758, train_time_taken: 8.8152
+step: 6800, lr: 0.000935, cost: 53.3481, z_cost: 1.1196, r_cost: 0.1825, train_time_taken: 8.7981
+step: 6820, lr: 0.000935, cost: 52.2980, z_cost: 1.1226, r_cost: 0.1706, train_time_taken: 8.2344
+step: 6840, lr: 0.000935, cost: 53.4627, z_cost: 1.1261, r_cost: 0.1836, train_time_taken: 7.8769
+step: 6860, lr: 0.000934, cost: 51.4735, z_cost: 1.1174, r_cost: 0.1624, train_time_taken: 7.9516
+step: 6880, lr: 0.000934, cost: 51.8069, z_cost: 1.1224, r_cost: 0.1697, train_time_taken: 7.6370
+step: 6900, lr: 0.000934, cost: 52.0540, z_cost: 1.1184, r_cost: 0.1699, train_time_taken: 7.9803
+step: 6920, lr: 0.000934, cost: 50.6137, z_cost: 1.1189, r_cost: 0.1603, train_time_taken: 8.7595
+step: 6940, lr: 0.000934, cost: 51.6505, z_cost: 1.1229, r_cost: 0.1634, train_time_taken: 8.8109
+step: 6960, lr: 0.000933, cost: 51.7593, z_cost: 1.1153, r_cost: 0.1691, train_time_taken: 8.3194
+step: 6980, lr: 0.000933, cost: 52.0021, z_cost: 1.1184, r_cost: 0.1626, train_time_taken: 7.7180
+step: 7000, lr: 0.000933, cost: 52.5162, z_cost: 1.1368, r_cost: 0.1730, train_time_taken: 8.4279
+step: 7020, lr: 0.000933, cost: 52.2082, z_cost: 1.1221, r_cost: 0.1764, train_time_taken: 8.8166
+step: 7040, lr: 0.000933, cost: 50.2429, z_cost: 1.1183, r_cost: 0.1589, train_time_taken: 8.8234
+step: 7060, lr: 0.000933, cost: 51.2624, z_cost: 1.1229, r_cost: 0.1637, train_time_taken: 8.7979
+step: 7080, lr: 0.000932, cost: 50.0086, z_cost: 1.1158, r_cost: 0.1615, train_time_taken: 8.8172
+step: 7100, lr: 0.000932, cost: 52.4273, z_cost: 1.1296, r_cost: 0.1655, train_time_taken: 8.8534
+step: 7120, lr: 0.000932, cost: 52.4589, z_cost: 1.1357, r_cost: 0.1679, train_time_taken: 8.8435
+step: 7140, lr: 0.000932, cost: 52.5807, z_cost: 1.1322, r_cost: 0.1804, train_time_taken: 8.8332
+step: 7160, lr: 0.000932, cost: 52.3193, z_cost: 1.1179, r_cost: 0.1721, train_time_taken: 8.6629
+step: 7180, lr: 0.000931, cost: 52.6823, z_cost: 1.1223, r_cost: 0.1657, train_time_taken: 8.8098
+step: 7200, lr: 0.000931, cost: 52.1372, z_cost: 1.1217, r_cost: 0.1793, train_time_taken: 8.8362
+step: 7220, lr: 0.000931, cost: 51.8330, z_cost: 1.1124, r_cost: 0.1624, train_time_taken: 8.8237
+step: 7240, lr: 0.000931, cost: 51.5195, z_cost: 1.1271, r_cost: 0.1666, train_time_taken: 8.8384
+step: 7260, lr: 0.000931, cost: 51.2185, z_cost: 1.1224, r_cost: 0.1660, train_time_taken: 8.8317
+step: 7280, lr: 0.000930, cost: 51.2923, z_cost: 1.1190, r_cost: 0.1635, train_time_taken: 8.7947
+step: 7300, lr: 0.000930, cost: 51.4508, z_cost: 1.1157, r_cost: 0.1670, train_time_taken: 8.8308
+step: 7320, lr: 0.000930, cost: 53.0929, z_cost: 1.1173, r_cost: 0.1786, train_time_taken: 8.8569
+step: 7340, lr: 0.000930, cost: 50.9478, z_cost: 1.1180, r_cost: 0.1561, train_time_taken: 8.8590
+step: 7360, lr: 0.000930, cost: 52.1263, z_cost: 1.1212, r_cost: 0.1709, train_time_taken: 8.8665
+step: 7380, lr: 0.000930, cost: 50.8315, z_cost: 1.1169, r_cost: 0.1642, train_time_taken: 8.8212
+step: 7400, lr: 0.000929, cost: 51.5552, z_cost: 1.1131, r_cost: 0.1612, train_time_taken: 8.8118
+step: 7420, lr: 0.000929, cost: 52.4054, z_cost: 1.1216, r_cost: 0.1661, train_time_taken: 8.8052
+step: 7440, lr: 0.000929, cost: 52.0887, z_cost: 1.1254, r_cost: 0.1734, train_time_taken: 8.8856
+step: 7460, lr: 0.000929, cost: 51.1163, z_cost: 1.1138, r_cost: 0.1635, train_time_taken: 8.6383
+step: 7480, lr: 0.000929, cost: 52.4613, z_cost: 1.1177, r_cost: 0.1682, train_time_taken: 8.4999
+step: 7500, lr: 0.000928, cost: 52.7862, z_cost: 1.1195, r_cost: 0.1752, train_time_taken: 8.3591
+step: 7520, lr: 0.000928, cost: 51.5639, z_cost: 1.1172, r_cost: 0.1644, train_time_taken: 8.6320
+step: 7540, lr: 0.000928, cost: 51.0258, z_cost: 1.1320, r_cost: 0.1628, train_time_taken: 8.5853
+step: 7560, lr: 0.000928, cost: 51.1117, z_cost: 1.1256, r_cost: 0.1763, train_time_taken: 8.3432
+step: 7580, lr: 0.000928, cost: 51.0816, z_cost: 1.1136, r_cost: 0.1611, train_time_taken: 7.6882
+step: 7600, lr: 0.000928, cost: 51.0654, z_cost: 1.1210, r_cost: 0.1617, train_time_taken: 8.0902
+step: 7620, lr: 0.000927, cost: 51.5033, z_cost: 1.1143, r_cost: 0.1634, train_time_taken: 8.7144
+step: 7640, lr: 0.000927, cost: 52.0539, z_cost: 1.1202, r_cost: 0.1679, train_time_taken: 8.6294
+step: 7660, lr: 0.000927, cost: 51.7458, z_cost: 1.1159, r_cost: 0.1644, train_time_taken: 8.6248
+step: 7680, lr: 0.000927, cost: 50.9420, z_cost: 1.1203, r_cost: 0.1622, train_time_taken: 8.6877
+step: 7700, lr: 0.000927, cost: 51.7428, z_cost: 1.1203, r_cost: 0.1609, train_time_taken: 8.6396
+step: 7720, lr: 0.000926, cost: 50.4410, z_cost: 1.1249, r_cost: 0.1520, train_time_taken: 8.5597
+step: 7740, lr: 0.000926, cost: 51.2337, z_cost: 1.1196, r_cost: 0.1661, train_time_taken: 8.5509
+step: 7760, lr: 0.000926, cost: 50.1974, z_cost: 1.1211, r_cost: 0.1512, train_time_taken: 8.5840
+step: 7780, lr: 0.000926, cost: 52.1883, z_cost: 1.1146, r_cost: 0.1660, train_time_taken: 8.5578
+step: 7800, lr: 0.000926, cost: 51.8034, z_cost: 1.1156, r_cost: 0.1687, train_time_taken: 8.5794
+step: 7820, lr: 0.000926, cost: 49.9365, z_cost: 1.1175, r_cost: 0.1425, train_time_taken: 8.5437
+step: 7840, lr: 0.000925, cost: 52.0262, z_cost: 1.1196, r_cost: 0.1705, train_time_taken: 8.5637
+step: 7860, lr: 0.000925, cost: 50.6979, z_cost: 1.1159, r_cost: 0.1640, train_time_taken: 8.5506
+step: 7880, lr: 0.000925, cost: 51.0484, z_cost: 1.1226, r_cost: 0.1549, train_time_taken: 8.5589
+step: 7900, lr: 0.000925, cost: 50.7860, z_cost: 1.1166, r_cost: 0.1554, train_time_taken: 8.6324
+step: 7920, lr: 0.000925, cost: 50.5728, z_cost: 1.1156, r_cost: 0.1636, train_time_taken: 8.5843
+step: 7940, lr: 0.000924, cost: 51.7214, z_cost: 1.1118, r_cost: 0.1712, train_time_taken: 8.8695
+step: 7960, lr: 0.000924, cost: 52.2445, z_cost: 1.1264, r_cost: 0.1664, train_time_taken: 8.5555
+step: 7980, lr: 0.000924, cost: 51.5789, z_cost: 1.1213, r_cost: 0.1679, train_time_taken: 8.5893
+step: 8000, lr: 0.000924, cost: 50.8242, z_cost: 1.1135, r_cost: 0.1602, train_time_taken: 8.4119
+step: 8020, lr: 0.000924, cost: 51.7184, z_cost: 1.1185, r_cost: 0.1672, train_time_taken: 8.5895
+step: 8040, lr: 0.000924, cost: 52.4990, z_cost: 1.1180, r_cost: 0.1735, train_time_taken: 8.5773
+step: 8060, lr: 0.000923, cost: 51.9871, z_cost: 1.1179, r_cost: 0.1637, train_time_taken: 8.6362
+step: 8080, lr: 0.000923, cost: 51.9453, z_cost: 1.1230, r_cost: 0.1684, train_time_taken: 8.5494
+step: 8100, lr: 0.000923, cost: 50.7581, z_cost: 1.1145, r_cost: 0.1626, train_time_taken: 8.5536
+step: 8120, lr: 0.000923, cost: 50.0085, z_cost: 1.1138, r_cost: 0.1523, train_time_taken: 8.5676
+step: 8140, lr: 0.000923, cost: 51.0262, z_cost: 1.1183, r_cost: 0.1606, train_time_taken: 8.6545
+step: 8160, lr: 0.000922, cost: 51.0490, z_cost: 1.1174, r_cost: 0.1640, train_time_taken: 8.6271
+step: 8180, lr: 0.000922, cost: 52.3466, z_cost: 1.1183, r_cost: 0.1683, train_time_taken: 8.6639
+step: 8200, lr: 0.000922, cost: 51.4306, z_cost: 1.1162, r_cost: 0.1621, train_time_taken: 8.6301
+step: 8220, lr: 0.000922, cost: 52.2676, z_cost: 1.1213, r_cost: 0.1719, train_time_taken: 8.6376
+step: 8240, lr: 0.000922, cost: 52.7300, z_cost: 1.1146, r_cost: 0.1723, train_time_taken: 8.6136
+step: 8260, lr: 0.000922, cost: 50.6708, z_cost: 1.1207, r_cost: 0.1580, train_time_taken: 8.5995
+step: 8280, lr: 0.000921, cost: 52.7512, z_cost: 1.1135, r_cost: 0.1790, train_time_taken: 8.6301
+step: 8300, lr: 0.000921, cost: 51.4345, z_cost: 1.1183, r_cost: 0.1553, train_time_taken: 8.6418
+step: 8320, lr: 0.000921, cost: 50.5766, z_cost: 1.1200, r_cost: 0.1620, train_time_taken: 8.6700
+step: 8340, lr: 0.000921, cost: 51.2946, z_cost: 1.1141, r_cost: 0.1680, train_time_taken: 8.7050
+step: 8360, lr: 0.000921, cost: 50.9677, z_cost: 1.1186, r_cost: 0.1636, train_time_taken: 8.7590
+step: 8380, lr: 0.000920, cost: 50.7439, z_cost: 1.1296, r_cost: 0.1612, train_time_taken: 8.9108
+(TF) shahd@shahd:/media/shahd/dcffe8cc-c40a-417c-b4ce-1a35d2c675e7/dreamingcar/dreamingcar-master$ 
+(TF) shahd@shahd:/media/shahd/dcffe8cc-c40a-417c-b4ce-1a35d2c675e7/dreamingcar/dreamingcar-master$ ^C
+(TF) shahd@shahd:/media/shahd/dcffe8cc-c40a-417c-b4ce-1a35d2c675e7/dreamingcar/dreamingcar-master$ 
+
