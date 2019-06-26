@@ -1,8 +1,12 @@
 import numpy as np
 import cv2
+from pyglet.window import key
+import sys
+import pyglet
 from gym import spaces
 from gym.spaces.box import Box
 from gym_duckietown.envs import DuckietownEnv
+from dreamduck.envs.env import DuckieTownWrapper
 from dreamduck.envs.rnn.rnn import reset_graph, rnn_model_path_name, \
     model_rnn_size, model_state_space, MDNRNN, hps_sample
 from dreamduck.envs.vae.vae import ConvVAE, vae_model_path_name
@@ -25,8 +29,8 @@ def _process_frame(frame):
 # World Model Representation
 
 
-class DuckieTownReal(DuckietownEnv):
-    def __init__(self, render_mode=False, load_model=True):
+class DuckieTownReal(DuckieTownWrapper):
+    def __init__(self, render_mode=True, load_model=True):
         super(DuckieTownReal, self).__init__()
         self.current_obs = None
 
@@ -58,7 +62,6 @@ class DuckieTownReal(DuckietownEnv):
         self.frame_count = None
         self.viewer = None
         self._reset()
-        #  self._render()
         self.reward = 0
 
     def _step(self, action):
@@ -76,7 +79,7 @@ class DuckieTownReal(DuckietownEnv):
         prev_reward = np.ones((1, 1))
         prev_reward[0][0] = self.reward
         # Real stuff from the env to encode it by the world model
-        obs, reward, done, _ = super(DuckieTownReal, self)._step(action)
+        obs, reward, done, _ = super(DuckieTownReal, self).step(action)
         s_model = self.rnn
 
         feed = {s_model.input_z: prev_z,
@@ -99,6 +102,7 @@ class DuckieTownReal(DuckietownEnv):
             self.restart = 0
 
         return self._current_state(), reward, done, {}
+        #  return small_obs, reward, done, {}
 
     def _encode(self, img):
         simple_obs = np.copy(img).astype(np.float)/255.0
@@ -144,10 +148,10 @@ class DuckieTownReal(DuckietownEnv):
         try:
             small_img = self.current_obs
             if small_img is None:
-                small_img = np.zeros(shape=(120, 160, 3), dtype=np.uint8)
-            small_img = cv2.resize(small_img, (120, 160))
+                small_img = np.zeros(shape=(64, 64, 3), dtype=np.uint8)
+            small_img = cv2.resize(small_img, (64, 64))
             vae_img = self._decode(self.z)
-            vae_img = cv2.resize(vae_img, (120, 160))
+            vae_img = cv2.resize(vae_img, (64, 64))
             all_img = np.concatenate((small_img, vae_img), axis=1)
             img = all_img
             if mode == 'rgb_array':
@@ -159,3 +163,60 @@ class DuckieTownReal(DuckietownEnv):
                 self.viewer.imshow(img)
         except:
             pass  # Duckietown has been closed
+
+if __name__ == "__main__":
+    env = DuckieTownReal()
+    env._reset()
+    env._render()
+
+    @env.unwrapped.window.event
+    def on_key_press(symbol, modifiers):
+        if symbol == key.BACKSPACE or symbol == key.SLASH:
+            print('RESET')
+            env._reset()
+            env._render()
+        elif symbol == (key.PAGEUP or key.SEMICOLON):
+            env.unwrapped.cam_angle[0] = 0
+        elif symbol == key.ESCAPE:
+            env.close()
+            sys.exit(0)
+    key_handler = key.KeyStateHandler()
+    env.unwrapped.window.push_handlers(key_handler)
+
+    def update(dt):
+        action = np.array([0.0, 0.0])
+        if key_handler[key.UP]:
+            action = np.array([0.44, 0.0])
+        if key_handler[key.DOWN]:
+            action = np.array([-0.44, 0])
+        if key_handler[key.LEFT]:
+            action = np.array([0.35, +1])
+        if key_handler[key.RIGHT]:
+            action = np.array([0.35, -1])
+        if key_handler[key.SPACE]:
+            action = np.array([0, 0])
+        # Speed boost
+        if key_handler[key.LSHIFT]:
+            action *= 1.5
+        obs, reward, done, info = env._step(action)
+        print('obs', obs.shape)
+        print('step_count = %s, reward=%.3f' %
+              (env.unwrapped.step_count, reward))
+
+        if key_handler[key.RETURN]:
+            from PIL import Image
+            im = Image.fromarray(obs)
+            im.save('screen.png')
+
+        if done:
+            print('done!')
+            env._reset()
+            env._render()
+
+        env._render()
+
+    pyglet.clock.schedule_interval(update, 1.0 / env.unwrapped.frame_rate)
+
+    # Enter main event loop
+    pyglet.app.run()
+    env.close()
