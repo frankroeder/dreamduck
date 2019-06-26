@@ -1,13 +1,18 @@
 import numpy as np
 import json
+from pyglet.window import key
+import sys
+import pyglet
 from gym import spaces
 from gym.spaces.box import Box
-from gym_duckietown.envs import DuckietownEnv
+from dreamduck.envs.env import DuckieTownWrapper
 from dreamduck.envs.rnn.rnn import reset_graph, rnn_model_path_name,\
     model_rnn_size, model_state_space, MDNRNN, hps_sample
 from dreamduck.envs.vae.vae import ConvVAE, vae_model_path_name
 import os
 from gym.utils import seeding
+from scipy.misc import imresize as resize
+import tensorflow as tf
 
 # actual observation size
 SCREEN_X = 64
@@ -38,7 +43,7 @@ def get_pi_idx(x, pdf):
 
 
 # Dreaming
-class DuckieTownRNN(DuckietownEnv):
+class DuckieTownRNN(DuckieTownWrapper):
     metadata = {
         'render.modes': ['human', 'rgb_array'],
         'video.frames_per_second': 50
@@ -208,3 +213,60 @@ class DuckieTownRNN(DuckietownEnv):
             if self.viewer is None:
                 self.viewer = rendering.SimpleImageViewer()
                 self.viewer.imshow(img)
+
+if __name__ == "__main__":
+    env = DuckieTownRNN()
+    env._reset()
+    env._render()
+
+    @env.unwrapped.window.event
+    def on_key_press(symbol, modifiers):
+        if symbol == key.BACKSPACE or symbol == key.SLASH:
+            print('RESET')
+            env._reset()
+            env._render()
+        elif symbol == (key.PAGEUP or key.SEMICOLON):
+            env.unwrapped.cam_angle[0] = 0
+        elif symbol == key.ESCAPE:
+            env.close()
+            sys.exit(0)
+    key_handler = key.KeyStateHandler()
+    env.unwrapped.window.push_handlers(key_handler)
+
+    def update(dt):
+        action = np.array([0.0, 0.0])
+        if key_handler[key.UP]:
+            action = np.array([0.44, 0.0])
+        if key_handler[key.DOWN]:
+            action = np.array([-0.44, 0])
+        if key_handler[key.LEFT]:
+            action = np.array([0.35, +1])
+        if key_handler[key.RIGHT]:
+            action = np.array([0.35, -1])
+        if key_handler[key.SPACE]:
+            action = np.array([0, 0])
+        # Speed boost
+        if key_handler[key.LSHIFT]:
+            action *= 1.5
+        obs, reward, done, info = env._step(action)
+        print('obs', obs.shape)
+        print('step_count = %s, reward=%.3f' %
+              (env.unwrapped.step_count, reward))
+
+        if key_handler[key.RETURN]:
+            from PIL import Image
+            im = Image.fromarray(obs)
+            im.save('screen.png')
+
+        if done:
+            print('done!')
+            env._reset()
+            env._render()
+
+        env._render()
+
+    pyglet.clock.schedule_interval(update, 1.0 / env.unwrapped.frame_rate)
+
+    # Enter main event loop
+    pyglet.app.run()
+    env.close()

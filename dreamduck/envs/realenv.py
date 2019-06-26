@@ -5,7 +5,6 @@ import sys
 import pyglet
 from gym import spaces
 from gym.spaces.box import Box
-from gym_duckietown.envs import DuckietownEnv
 from dreamduck.envs.env import DuckieTownWrapper
 from dreamduck.envs.rnn.rnn import reset_graph, rnn_model_path_name, \
     model_rnn_size, model_state_space, MDNRNN, hps_sample
@@ -26,9 +25,8 @@ def _process_frame(frame):
     obs = ((1.0 - obs) * 255).round().astype(np.uint8)
     return obs
 
+
 # World Model Representation
-
-
 class DuckieTownReal(DuckieTownWrapper):
     def __init__(self, render_mode=True, load_model=True):
         super(DuckieTownReal, self).__init__()
@@ -157,12 +155,52 @@ class DuckieTownReal(DuckieTownWrapper):
             if mode == 'rgb_array':
                 return img
             elif mode == 'human':
-                from gym.envs.classic_control import rendering
-                if self.viewer is None:
-                    self.viewer = rendering.SimpleImageViewer()
-                self.viewer.imshow(img)
+                from pyglet import gl, window, image
+                if self.window is None:
+                    config = gl.Config(double_buffer=False)
+                    self.window = window.Window(
+                            width=SCREEN_X,
+                            height=SCREEN_Y,
+                            resizable=False,
+                            config=config
+                    )
+
+                self.window.clear()
+                self.window.switch_to()
+                self.window.dispatch_events()
+
+                # Bind the default frame buffer
+                gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
+
+                # Setup orghogonal projection
+                gl.glMatrixMode(gl.GL_PROJECTION)
+                gl.glLoadIdentity()
+                gl.glMatrixMode(gl.GL_MODELVIEW)
+                gl.glLoadIdentity()
+                gl.glOrtho(0, SCREEN_X, 0, SCREEN_Y, 0, 10)
+
+                # Draw the image to the rendering window
+                width = img.shape[1]
+                height = img.shape[0]
+                img = np.ascontiguousarray(np.flip(img, axis=0))
+                from ctypes import POINTER
+                img_data = image.ImageData(
+                        width,
+                        height,
+                        'RGB',
+                        img.ctypes.data_as(POINTER(gl.GLubyte)),
+                        pitch=width * 3,
+                )
+                img_data.blit(
+                        0,
+                        0,
+                        0,
+                        width=SCREEN_X,
+                        height=SCREEN_Y
+                )
         except:
             pass  # Duckietown has been closed
+
 
 if __name__ == "__main__":
     env = DuckieTownReal()
