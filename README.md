@@ -27,7 +27,7 @@ Choose DreamDuck-v0 for the default environment. -v1 for the World Model
 interpretation of the real environment and -v2 for the dream environment.
 
 - `python -m baselines.run --alg=ppo2 --env=DreamDuck-v0 --num_timesteps=2e7
-  --save_path=./models/dreamduck__ppo2`
+  --num_env=4 --save_path=./models/dreamduck__ppo2`
 
 - `python -m baselines.run --alg=ppo2 --env=DreamDuck-v0 --num_timesteps=0
   --load_path=./models/dreamduck__ppo2 --play`

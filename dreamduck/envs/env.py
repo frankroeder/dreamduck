@@ -8,7 +8,8 @@ import gym
 from gym import spaces
 from gym.spaces.box import Box
 from gym_duckietown.envs import DuckietownEnv
-from dreamduck.envs.rnn.rnn import reset_graph, rnn_model_path_name, model_rnn_size, model_state_space, MDNRNN, hps_sample
+from dreamduck.envs.rnn.rnn import reset_graph, rnn_model_path_name, \
+    model_rnn_size, model_state_space, MDNRNN, hps_sample
 from dreamduck.envs.vae.vae import ConvVAE, vae_model_path_name
 import os
 
@@ -72,7 +73,6 @@ if __name__ == "__main__":
         frame_skip=args.frame_skip,
         distortion=args.distortion,
     )
-    env = ResizeWrapper(env)
     env.reset()
     env.render()
 
