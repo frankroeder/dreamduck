@@ -83,13 +83,9 @@ class Model:
         t = np.random.uniform(0., 1.)
 
         if t < rand_prob:
-
             self.action = np.random.uniform(-1., 1., (2,))
-
         else:
-
             self.action += np.random.uniform(-0.1, 0.1, (2,))
-
         action = self.action
 
         return action

@@ -17,7 +17,8 @@ def reset_graph():
 
 class ConvVAE(object):
     def __init__(self, z_size=64, batch_size=1, learning_rate=0.0001,
-                 kl_tolerance=0.5, is_training=False, reuse=False, gpu_mode=False):
+                 kl_tolerance=0.5, is_training=False, reuse=False,
+                 gpu_mode=False):
         self.z_size = z_size
         self.batch_size = batch_size
         self.learning_rate = learning_rate
@@ -30,7 +31,7 @@ class ConvVAE(object):
                     tf.logging.info('Model using cpu.')
                     self._build_graph()
             else:
-                tf.logging.info('Model using gpu.')
+                tf.logYing.info('Model using gpu.')
                 self._build_graph()
         self._init_session()
 

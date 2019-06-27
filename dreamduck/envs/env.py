@@ -3,38 +3,33 @@ import sys
 import pyglet
 from pyglet.window import key
 import argparse
-import cv2
-import gym
-from gym import spaces
 from gym.spaces.box import Box
 from gym_duckietown.envs import DuckietownEnv
-from dreamduck.envs.rnn.rnn import reset_graph, rnn_model_path_name, \
-    model_rnn_size, model_state_space, MDNRNN, hps_sample
-from dreamduck.envs.vae.vae import ConvVAE, vae_model_path_name
-import os
+from scipy.misc import imresize as resize
 
-# actual observation size
 SCREEN_X = 64
 SCREEN_Y = 64
 
 
 def _process_frame(frame):
-    obs = frame[0:84, :, :].astype(np.float)/255.0
+    obs = frame[:, :, :].astype(np.float)/255.0
+    obs = np.array(resize(obs, (SCREEN_X, SCREEN_Y)))
     obs = ((1.0 - obs) * 255).round().astype(np.uint8)
     return obs
 
 
-# The real env
 class DuckieTownWrapper(DuckietownEnv):
-    def __init__(self, seed=0, full_episode=False):
+    def __init__(self, full_episode=False):
         super(DuckieTownWrapper, self).__init__(
-            camera_width=SCREEN_Y,
-            camera_height=SCREEN_X,
+            camera_width=SCREEN_X,
+            camera_height=SCREEN_Y,
             map_name='loop_dyn_duckiebots',
             domain_rand=False,
-            seed=seed
+            seed=0
         )
         self.full_episode = full_episode
+        self.observation_space = Box(
+            low=0, high=255, shape=(SCREEN_X, SCREEN_Y, 3))
 
     def step(self, action):
         obs, reward, done, _ = super(DuckieTownWrapper, self).step(action)
@@ -43,8 +38,8 @@ class DuckieTownWrapper(DuckietownEnv):
         return _process_frame(obs), reward, done, {}
 
 
-def make_env(env_name="duckie", seed=-1, render_mode=False, load_model=True):
-    env = DuckieTownWrapper(render_mode=render_mode, load_model=load_model)
+def make_env(seed=-1, full_episode=False):
+    env = DuckieTownWrapper(full_episode=full_episode)
     if seed >= 0:
         env.seed(seed)
     return env
@@ -106,7 +101,7 @@ if __name__ == "__main__":
         if key_handler[key.LSHIFT]:
             action *= 1.5
         obs, reward, done, info = env.step(action)
-        print('obs', obs.shape)
+        #  print('obs', obs.shape)
         print('step_count = %s, reward=%.3f' %
               (env.unwrapped.step_count, reward))
 
