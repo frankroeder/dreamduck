@@ -6,7 +6,6 @@ also save 1000 initial mu and logvar, for generative experiments (not related to
 import numpy as np
 import os
 import json
-import tensorflow as tf
 import random
 import time
 
@@ -31,26 +30,28 @@ if not os.path.exists(initial_z_save_path):
 
 
 def default_hps():
-    return HyperParams(max_seq_len=500,  # train on sequences of 500 (found it worked better than 1000)
-                       seq_width=64,    # width of our data (64)
-                       rnn_size=model_rnn_size,    # number of rnn cells
-                       batch_size=100,   # minibatch sizes
-                       grad_clip=1.0,
-                       num_mixture=model_num_mixture,   # number of mixtures in MDN
-                       # factor of importance for restart=1 rare case for loss.
-                       restart_factor=model_restart_factor,
-                       learning_rate=0.001,
-                       decay_rate=0.99999,
-                       min_learning_rate=0.00001,
-                       # set this to 1 to get more stable results (less chance of NaN), but slower
-                       use_layer_norm=0,
-                       use_recurrent_dropout=0,
-                       recurrent_dropout_prob=0.90,
-                       use_input_dropout=0,
-                       input_dropout_prob=0.90,
-                       use_output_dropout=0,
-                       output_dropout_prob=0.90,
-                       is_training=1)
+    return HyperParams(
+        # train on sequences of 500 (found it worked better than 1000)
+        max_seq_len=500,
+        seq_width=64,    # width of our data (64)
+        rnn_size=model_rnn_size,    # number of rnn cells
+        batch_size=100,   # minibatch sizes
+        grad_clip=1.0,
+        num_mixture=model_num_mixture,   # number of mixtures in MDN
+        # factor of importance for restart=1 rare case for loss.
+        restart_factor=model_restart_factor,
+        learning_rate=0.001,
+        decay_rate=0.99999,
+        min_learning_rate=0.00001,
+        # set this to 1 to get more stable results (less chance of NaN), but slower
+        use_layer_norm=0,
+        use_recurrent_dropout=0,
+        recurrent_dropout_prob=0.90,
+        use_input_dropout=0,
+        input_dropout_prob=0.90,
+        use_output_dropout=0,
+        output_dropout_prob=0.90,
+        is_training=1)
 
 
 hps_model = default_hps()
@@ -168,15 +169,16 @@ hps = hps_model
 start = time.time()
 
 for epoch in range(1, 401):
-    #print('preparing data for epoch', epoch)
-    data_mu, data_logvar, data_action, data_restart, data_reward = 0, 0, 0, 0, 0
-    data_mu, data_logvar, data_action, data_restart, data_reward = create_batches(
-        all_data)
+    # print('preparing data for epoch', epoch)
+    data_mu, data_logvar, data_action, data_restart, data_reward = \
+        0, 0, 0, 0, 0
+    data_mu, data_logvar, data_action, data_restart, data_reward = \
+        create_batches(all_data)
     num_batches = len(data_mu)
-    #print('number of batches', num_batches)
+    # print('number of batches', num_batches)
     end = time.time()
     time_taken = end-start
-    #print('time taken to create batches', time_taken)
+    # print('time taken to create batches', time_taken)
 
     batch_state = model.sess.run(model.initial_state)
 

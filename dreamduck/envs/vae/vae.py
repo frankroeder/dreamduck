@@ -31,7 +31,7 @@ class ConvVAE(object):
                     tf.logging.info('Model using cpu.')
                     self._build_graph()
             else:
-                tf.logYing.info('Model using gpu.')
+                tf.logging.info('Model using gpu.')
                 self._build_graph()
         self._init_session()
 

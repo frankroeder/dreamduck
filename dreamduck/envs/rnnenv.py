@@ -1,40 +1,26 @@
 import numpy as np
 import json
-from pyglet.window import key
+import sys
 from gym import spaces
 from gym.spaces.box import Box
-from dreamduck.envs.env import DuckieTownWrapper
 from dreamduck.envs.rnn.rnn import reset_graph, rnn_model_path_name,\
-    model_rnn_size, model_state_space, MDNRNN, hps_sample
+    model_rnn_size, model_state_space, MDNRNN, hps_sample, get_pi_idx
 from dreamduck.envs.vae.vae import ConvVAE, vae_model_path_name
 import os
 from gym.utils import seeding
-from scipy.misc import imresize as resize
+from cv2 import resize
 import tensorflow as tf
+import gym
 
-# actual observation size
 SCREEN_X = 64
 SCREEN_Y = 64
-TEMPERATURE = 1.25  # train with this temperature
+#  TEMPERATURE = 1.25
+TEMPERATURE = 0.4
 
 model_path_name = 'dreamduck/envs/tf_initial_z'
 
 
-def get_pi_idx(x, pdf):
-    # samples from a categorial distribution
-    N = pdf.size
-    accumulate = 0
-    for i in range(0, N):
-        accumulate += pdf[i]
-        if (accumulate >= x):
-            return i
-    random_value = np.random.randint(N)
-    # print('error with sampling ensemble, returning random', random_value)
-    return random_value
-
-
 # Dreaming
-import gym
 class DuckieTownRNN(gym.Env):
     metadata = {
         'render.modes': ['human', 'rgb_array'],
@@ -59,7 +45,6 @@ class DuckieTownRNN(gym.Env):
             self.vae.load_json(os.path.join(vae_model_path_name, 'vae.json'))
             self.rnn.load_json(os.path.join(rnn_model_path_name, 'rnn.json'))
 
-        # TODO: right shape?
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,))
 
         self.outwidth = self.rnn.hps.seq_width
@@ -79,7 +64,7 @@ class DuckieTownRNN(gym.Env):
         self.viewer = None
 
         self.reward = 0
-        self.max_frame = 1000
+        self.max_frame = 150
         self.np_random = np.random
 
         self.reset()
@@ -188,7 +173,7 @@ class DuckieTownRNN(gym.Env):
         img = np.round(img).astype(np.uint8)
         img = img.reshape(64, 64, 3)
         if upsize:
-            img = resize(img, (600, 800))
+            img = resize(img, (800, 600))
         return img
 
     def render(self, mode='human', close=False):
@@ -209,16 +194,19 @@ class DuckieTownRNN(gym.Env):
             from gym.envs.classic_control import rendering
             if self.viewer is None:
                 self.viewer = rendering.SimpleImageViewer()
-                self.viewer.imshow(img)
+            self.viewer.imshow(img)
 
 
 if __name__ == "__main__":
+
+    env = DuckieTownRNN(render_mode=True)
     from pyglet.window import key
     a = np.array([0.0, 0.0])
     overwrite = False
 
     def key_press(k, mod):
-        global overwrite
+        global overwrite, a
+        overwrite = True
         if k == key.UP:
             a = np.array([0.44, 0.0])
         if k == key.DOWN:
@@ -229,6 +217,9 @@ if __name__ == "__main__":
             a = np.array([0.35, -1])
         if k == key.SPACE:
             a = np.array([0, 0])
+        if k == key.ESCAPE:
+            env.close()
+            sys.exit(0)
         # Speed boost
         if k == key.LSHIFT:
             a *= 1.5
@@ -237,12 +228,13 @@ if __name__ == "__main__":
         a[0] = 0.
         a[1] = 0.
 
-    env = DuckieTownRNN(render_mode=True)
     env.render()
+    env.viewer.window.on_key_press = key_press
+    env.viewer.window.on_key_release = key_release
 
     reward_list = []
 
-    for i in range(400):
+    for i in range(40):
         env.reset()
         total_reward = 0.0
         steps = 0
@@ -254,19 +246,17 @@ if __name__ == "__main__":
         obs_list.append(obs)
         z_list.append(obs[0:64])
 
-        overwrite = True
-        env.viewer.window.on_key_press = key_press
-        env.viewer.window.on_key_release = key_release
+        overwrite = False
+
         while True:
-            if steps % 200 == 0:
+            action = np.array([.0, .0])
+            # TODO: We need this random actions?
+            if steps % repeat == 0:
                 action = np.random.uniform(-1., 1., (2,))
                 repeat = np.random.randint(1, 11)
-            #  action = np.array([.0, .0])
-            action = np.random.uniform(-1., 1., (2,))
 
             if overwrite:
                 action = a
-            #  print(action)
 
             obs, reward, done, info = env.step(action)
             obs_list.append(obs)
@@ -279,6 +269,6 @@ if __name__ == "__main__":
             if done:
                 break
         reward_list.append(total_reward)
-        print('cumulative reward', total_reward)
+        #  print('cumulative reward', total_reward)
     env.close()
     print('average reward', np.mean(reward_list))

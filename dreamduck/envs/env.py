@@ -5,7 +5,7 @@ from pyglet.window import key
 import argparse
 from gym.spaces.box import Box
 from gym_duckietown.envs import DuckietownEnv
-from scipy.misc import imresize as resize
+from cv2 import resize
 
 SCREEN_X = 64
 SCREEN_Y = 64

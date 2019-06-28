@@ -9,7 +9,7 @@ from dreamduck.envs.rnn.rnn import reset_graph, rnn_model_path_name, \
     model_rnn_size, model_state_space, MDNRNN, hps_sample
 from dreamduck.envs.vae.vae import ConvVAE, vae_model_path_name
 import os
-from scipy.misc import imresize as resize
+from cv2 import resize
 from gym.utils import seeding
 import tensorflow as tf
 

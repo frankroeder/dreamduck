@@ -7,8 +7,6 @@ based learning in the environment of _Duckietown_.
 
 `pip install -r requirements.txt`
 
-## Usage
-
 ## Training
 
 ### Generate Training Examples

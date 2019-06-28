@@ -3,7 +3,6 @@ import os
 import tensorflow as tf
 from collections import namedtuple
 import json
-from scipy.misc import imresize as resize
 
 np.set_printoptions(precision=4, edgeitems=6, linewidth=100, suppress=True)
 
