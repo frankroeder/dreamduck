@@ -9,25 +9,12 @@ based learning in the environment of _Duckietown_.
 
 ## Usage
 
-### Manual
-
-`python env.py --map-name loop_pedestrians`
-`python env.py --map-name loop_dyn_duckiebots `
-
-## Help
-
-`python env.py -h`
-
 ## Training
 
 ### Generate Training Examples
 
 Use python `extract.py` to generate rollouts records or
-`python extract.py --debug --full-episode` for debugging and full episode.
-
-## TODOS
-
-- cleanup code
+`python extract.py --debug --full-episode` for debugging and full episodes.
 
 ## Pipeline
 
