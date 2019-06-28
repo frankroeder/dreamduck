@@ -14,7 +14,7 @@ future==0.17.1
 gast==0.2.2
 grpcio==1.20.1
 gym==0.12.1
--e git+https://github.com/Bassstring/gym-duckietown@7942baeac63a789888916492ac541a919799736d#egg=gym_duckietown
+-e git+https://github.com/Bassstring/gym-duckietown@5838a9621d57483bdba7fcbd930bcc1682457bb8#egg=gym_duckietown
 h5py==2.9.0
 idna==2.8
 imageio==2.5.0

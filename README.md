@@ -53,5 +53,4 @@ Usage like `baselines===0.1.5`:
 
 ## Authors
 
-Frank Röder
-Shahd Safarani
+Frank Röder & Shahd Safarani
