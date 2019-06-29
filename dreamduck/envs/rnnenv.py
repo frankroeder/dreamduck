@@ -123,11 +123,12 @@ class DuckieTownRNN(gym.Env):
                 s_model.initial_state: self.rnn_state
                 }
 
-        [logmix, mean, logstd, logrestart, next_state] = \
+        [logmix, mean, logstd, logrestart, reward, next_state] = \
             s_model.sess.run([s_model.out_logmix,
                               s_model.out_mean,
                               s_model.out_logstd,
                               s_model.out_restart_logits,
+                              s_model.reward_logits,
                               s_model.final_state],
                              feed)
 
@@ -161,7 +162,7 @@ class DuckieTownRNN(gym.Env):
         self.restart = next_restart
         self.rnn_state = next_state
 
-        reward = 1  # always return a reward of one if still alive.
+        self.reward = reward
 
         if self.frame_count >= self.max_frame:
             done = True
