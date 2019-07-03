@@ -5,8 +5,6 @@ final model saved into tf_vae/vae.json
 
 from vae.vae import reset_graph, ConvVAE
 import numpy as np
-import random
-import tensorflow as tf
 import os
 # can just override for multi-gpu systems
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
@@ -80,8 +78,8 @@ def create_dataset(raw_data_list):
 filelist = os.listdir(DATA_DIR)
 filelist.sort()
 filelist = np.array(filelist[:10000])
-#dataset = load_raw_data_list(filelist)
-#dataset = create_dataset(dataset)
+dataset = load_raw_data_list(filelist)
+dataset = create_dataset(dataset)
 
 # split into batches:
 total_episodes = len(filelist)

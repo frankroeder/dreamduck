@@ -1,3 +1,4 @@
+
 from collections import namedtuple
 
 Game = namedtuple('Game', ['env_name', 'input_size',
@@ -5,9 +6,16 @@ Game = namedtuple('Game', ['env_name', 'input_size',
 
 games = {}
 
-duckietown = Game(env_name='duckietown',
-                  input_size=576+512*1,
-                  output_size=2,
-                  activation='tanh',
-                  )
-games['duckietown'] = duckietown
+rnnenv = Game(env_name='rnnenv',
+              input_size=576+512*1,
+              output_size=1,
+              activation='tanh',
+              )
+games['rnnenv'] = rnnenv
+
+realenv = Game(env_name='realenv',
+               input_size=576+512*1,
+               output_size=1,
+               activation='tanh',
+               )
+games['realenv'] = realenv

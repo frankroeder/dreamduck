@@ -16,7 +16,8 @@ model_state_space = 2  # includes C and H concatenated if 2, otherwise just H
 
 TEMPERATURE = 1.25  # train with this temperature
 
-# hyperparameters for our model. I was doing this on an older tf version, when HParams was not available ...
+# hyperparameters for our model. I was doing this on an older tf version, when
+# HParams was not available ...
 
 HyperParams = namedtuple('HyperParams', ['max_seq_len',
                                          'seq_width',
@@ -72,8 +73,6 @@ def reset_graph():
         sess.close()
     # tf.reset_default_graph()
 
-
-# MDN-RNN model tailored for doomrnn
 
 class MDNRNN():
     def __init__(self, hps, gpu_mode=True, reuse=False):
@@ -134,14 +133,22 @@ class MDNRNN():
         self.cell = cell
 
         self.sequence_lengths = LENGTH  # assume every sample has same length.
-        self.batch_z = tf.placeholder(dtype=tf.float32, shape=[
-                                      self.hps.batch_size, self.hps.max_seq_len, WIDTH])
+
+        self.batch_z = tf.placeholder(
+            dtype=tf.float32,
+            shape=[self.hps.batch_size, self.hps.max_seq_len, WIDTH])
+
         self.batch_action = tf.placeholder(
-            dtype=tf.float32, shape=[self.hps.batch_size, self.hps.max_seq_len, 2])
+            dtype=tf.float32,
+            shape=[self.hps.batch_size, self.hps.max_seq_len, 2])
+
         self.batch_restart = tf.placeholder(
-            dtype=tf.float32, shape=[self.hps.batch_size, self.hps.max_seq_len])
+            dtype=tf.float32,
+            shape=[self.hps.batch_size, self.hps.max_seq_len])
+
         self.batch_reward = tf.placeholder(
-            dtype=tf.float32, shape=[self.hps.batch_size, self.hps.max_seq_len])
+            dtype=tf.float32,
+            shape=[self.hps.batch_size, self.hps.max_seq_len])
 
         self.input_z = self.batch_z[:, :LENGTH, :]
         self.input_action = self.batch_action[:, :LENGTH]
@@ -152,15 +159,17 @@ class MDNRNN():
         self.target_restart = self.batch_restart[:, 1:]
         self.target_reward = self.batch_reward[:, 1:]
 
-        self.input_seq = tf.concat([self.input_z,
-                                    tf.reshape(self.input_action, [
-                                               self.hps.batch_size, LENGTH, 2]),
-                                    tf.reshape(self.input_restart, [
-                                               self.hps.batch_size, LENGTH, 1]),
-                                    tf.reshape(self.input_reward, [self.hps.batch_size, LENGTH, 1])], axis=2)
+        self.input_seq = tf.concat([
+            self.input_z,
+            tf.reshape(self.input_action, [self.hps.batch_size, LENGTH, 2]),
+            tf.reshape(self.input_restart, [self.hps.batch_size, LENGTH, 1]),
+            tf.reshape(self.input_reward, [self.hps.batch_size, LENGTH, 1])
+        ], axis=2)
 
         self.zero_state = cell.zero_state(
-            batch_size=hps.batch_size, dtype=tf.float32)
+            batch_size=hps.batch_size,
+            dtype=tf.float32
+        )
         self.initial_state = self.zero_state
 
         inputs = tf.unstack(self.input_seq, axis=1)
@@ -244,8 +253,9 @@ class MDNRNN():
 
         flat_target_restart = tf.reshape(self.target_restart, [-1, 1])
 
-        self.r_cost = tf.nn.sigmoid_cross_entropy_with_logits(labels=flat_target_restart,
-                                                              logits=tf.reshape(self.out_restart_logits, [-1, 1]))
+        self.r_cost = tf.nn.sigmoid_cross_entropy_with_logits(
+            labels=flat_target_restart,
+            logits=tf.reshape(self.out_restart_logits, [-1, 1]))
 
         factor = tf.ones_like(self.r_cost) + \
             flat_target_restart * (self.hps.restart_factor-1.0)
@@ -253,8 +263,10 @@ class MDNRNN():
         self.r_cost = tf.reduce_mean(tf.multiply(factor, self.r_cost))
 
         self.reward_logits = tf.nn.tanh(self.out_reward_logits)
-        self.reward_cost = tf.norm(tf.reshape(
-            self.target_reward, [-1, 1])-tf.reshape(self.reward_logits, [-1, 1]), ord='euclidean')
+        self.reward_cost = tf.norm(
+            tf.reshape(self.target_reward,
+                       [-1, 1])-tf.reshape(self.reward_logits, [-1, 1]),
+            ord='euclidean')
 
         self.cost = self.z_cost + self.r_cost + self.reward_cost
 
@@ -375,7 +387,6 @@ def get_pi_idx(x, pdf):
         if (accumulate >= x):
             return i
     random_value = np.random.randint(N)
-    #print('error with sampling ensemble, returning random', random_value)
     return random_value
 
 

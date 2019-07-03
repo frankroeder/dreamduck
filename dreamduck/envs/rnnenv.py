@@ -15,12 +15,13 @@ import gym
 SCREEN_X = 64
 SCREEN_Y = 64
 #  TEMPERATURE = 1.25
-TEMPERATURE = 0.4
+TEMPERATURE = 0.75
 
 model_path_name = 'dreamduck/envs/tf_initial_z'
 
-
 # Dreaming
+
+
 class DuckieTownRNN(gym.Env):
     metadata = {
         'render.modes': ['human', 'rgb_array'],
@@ -28,6 +29,7 @@ class DuckieTownRNN(gym.Env):
     }
 
     def __init__(self, render_mode=False, load_model=True):
+        super(gym.Env, self).__init__()
         self.render_mode = render_mode
 
         with open(os.path.join(model_path_name, 'initial_z.json'), 'r') as f:
@@ -54,7 +56,7 @@ class DuckieTownRNN(gym.Env):
             low=-50., high=50., shape=(self.obs_size,))
 
         self.zero_state = self.rnn.sess.run(self.rnn.zero_state)
-        self.seed()
+        self._seed()
 
         self.rnn_state = None
         self.z = None
@@ -64,12 +66,13 @@ class DuckieTownRNN(gym.Env):
         self.viewer = None
 
         self.reward = 0
-        self.max_frame = 150
+        # TODO: Change
+        self.max_frame = 2100
         self.np_random = np.random
 
-        self.reset()
+        self._reset()
 
-    def sample_init_z(self):
+    def _sample_init_z(self):
         idx = self.np_random.randint(0, len(self.initial_mu_logvar))
         init_mu, init_logvar = self.initial_mu_logvar[idx]
         init_mu = np.array(init_mu)/10000.
@@ -78,26 +81,28 @@ class DuckieTownRNN(gym.Env):
             self.np_random.randn(*init_logvar.shape)
         return init_z
 
-    def current_state(self):
+    def _current_state(self):
         if model_state_space == 2:
-            return np.concatenate([self.z, self.rnn_state.c.flatten(), self.rnn_state.h.flatten()], axis=0)
+            return np.concatenate([
+                self.z, self.rnn_state.c.flatten(), self.rnn_state.h.flatten()
+            ], axis=0)
         return np.concatenate([self.z, self.rnn_state.h.flatten()], axis=0)
 
-    def reset(self):
+    def _reset(self):
         self.temperature = TEMPERATURE
         self.rnn_state = self.zero_state
-        self.z = self.sample_init_z()
+        self.z = self._sample_init_z()
         self.restart = 1
         self.frame_count = 0
-        return self.current_state()
+        return self._current_state()
 
-    def seed(self, seed=None):
+    def _seed(self, seed=None):
         if seed:
             tf.set_random_seed(seed)
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
-    def step(self, action):
+    def _step(self, action):
 
         self.frame_count += 1
 
@@ -167,7 +172,7 @@ class DuckieTownRNN(gym.Env):
         if self.frame_count >= self.max_frame:
             done = True
 
-        return self.current_state(), reward, done, {}
+        return self._current_state(), reward, done, {}
 
     def _get_image(self, upsize=False):
         img = self.vae.decode(self.z.reshape(1, 64)) * 255.
@@ -177,7 +182,7 @@ class DuckieTownRNN(gym.Env):
             img = resize(img, (800, 600))
         return img
 
-    def render(self, mode='human', close=False):
+    def _render(self, mode='human', close=False):
         if not self.render_mode:
             return
 
@@ -229,21 +234,21 @@ if __name__ == "__main__":
         a[0] = 0.
         a[1] = 0.
 
-    env.render()
+    env._render()
     env.viewer.window.on_key_press = key_press
     env.viewer.window.on_key_release = key_release
 
     reward_list = []
 
     for i in range(40):
-        env.reset()
+        env._reset()
         total_reward = 0.0
         steps = 0
 
         repeat = np.random.randint(1, 11)
         obs_list = []
         z_list = []
-        obs = env.reset()
+        obs = env._reset()
         obs_list.append(obs)
         z_list.append(obs[0:64])
 
@@ -259,17 +264,17 @@ if __name__ == "__main__":
             if overwrite:
                 action = a
 
-            obs, reward, done, info = env.step(action)
+            obs, reward, done, info = env._step(action)
             obs_list.append(obs)
             z_list.append(obs[0:64])
             total_reward += reward
             steps += 1
 
             if env.render_mode:
-                env.render()
+                env._render()
             if done:
                 break
         reward_list.append(total_reward)
-        #  print('cumulative reward', total_reward)
+        print('cumulative reward', total_reward)
     env.close()
     print('average reward', np.mean(reward_list))

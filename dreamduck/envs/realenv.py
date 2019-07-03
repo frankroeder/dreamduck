@@ -15,6 +15,7 @@ import tensorflow as tf
 
 SCREEN_X = 64
 SCREEN_Y = 64
+DEBUG = True
 
 
 def _process_frame(frame):
@@ -26,8 +27,12 @@ def _process_frame(frame):
 
 # World Model Representation
 class DuckieTownReal(DuckieTownWrapper):
-    def __init__(self, render_mode=True, load_model=True):
+    def __init__(self, render_mode=False, load_model=True):
         super(DuckieTownReal, self).__init__()
+
+        self.no_render = True
+        if render_mode:
+            self.no_render = False
         self.current_obs = None
 
         reset_graph()
@@ -82,7 +87,7 @@ class DuckieTownReal(DuckieTownWrapper):
 
         self.rnn_state = s_model.sess.run(s_model.final_state, feed)
 
-        obs, reward, done, _ = super(DuckieTownReal, self).step(action)
+        obs, reward, done, _ = super(DuckieTownReal, self)._step(action)
         small_obs = _process_frame(obs)
         self.current_obs = small_obs
         self.z = self._encode(small_obs)
@@ -99,7 +104,8 @@ class DuckieTownReal(DuckieTownWrapper):
         simple_obs = np.copy(img).astype(np.float)/255.0
         simple_obs = simple_obs.reshape(1, SCREEN_X, SCREEN_Y, 3)
         mu, logvar = self.vae.encode_mu_logvar(simple_obs)
-        return (mu + np.exp(logvar/2.0) * self.np_random.randn(*logvar.shape))[0]
+        return (mu + np.exp(logvar/2.0) \
+                * self.np_random.randn(*logvar.shape))[0]
 
     def _decode(self, z):
         img = self.vae.decode(z.reshape(1, 64)) * 255.
@@ -119,7 +125,9 @@ class DuckieTownReal(DuckieTownWrapper):
 
     def _current_state(self):
         if model_state_space == 2:
-            return np.concatenate([self.z, self.rnn_state.c.flatten(), self.rnn_state.h.flatten()], axis=0)
+            return np.concatenate([
+                self.z, self.rnn_state.c.flatten(), self.rnn_state.h.flatten()
+            ], axis=0)
         return np.concatenate([self.z, self.rnn_state.h.flatten()], axis=0)
 
     def _seed(self, seed=None):
@@ -132,7 +140,6 @@ class DuckieTownReal(DuckieTownWrapper):
         if close:
             if self.viewer is not None:
                 self.viewer.close()
-                # If we don't None out this reference pyglet becomes unhappy
                 self.viewer = None
             return
         try:
@@ -143,8 +150,9 @@ class DuckieTownReal(DuckieTownWrapper):
             small_img = resize(small_img, (64, 64))
             vae_img = self._decode(self.z)
             vae_img = resize(vae_img, (64, 64))
-            all_img = np.concatenate((small_img, vae_img), axis=1)
-            img = all_img
+            img = np.concatenate((small_img, vae_img), axis=1)
+            if not DEBUG:
+                img = vae_img
             if mode == 'rgb_array':
                 return img
             elif mode == 'human':

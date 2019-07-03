@@ -6,7 +6,7 @@ import gym
 from model import make_model
 
 MAX_FRAMES = 150
-MAX_TRIALS = 4000  # just use this to extract one trial.
+MAX_TRIALS = 4000
 MIN_LENGTH = 50
 
 render_mode = False  # for debugging.

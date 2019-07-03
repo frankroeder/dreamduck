@@ -12,7 +12,6 @@ RENDER_DELAY = False
 
 
 def make_model(game):
-    # can be extended in the future.
     model = Model(game)
     return model
 
@@ -43,6 +42,7 @@ class Model:
 
     def __init__(self, game):
         self.action = np.random.uniform(-1., 1., (2,))
+
         self.noise_level = 0.0
         self.env_name = game.env_name
 
@@ -69,24 +69,23 @@ class Model:
 
         self.render_mode = False
 
-    def make_env(self, seed=-1, render_mode=False, full_episode=False):
+    def make_env(self, seed=-1, render_mode=False, load_model=True):
         self.render_mode = render_mode
-        self.env = make_env(seed=seed, full_episode=full_episode)
+        self.env = make_env(self.env_name, seed=seed, render_mode=render_mode,
+                            load_model=load_model)
 
     def get_action(self, z):
-
+        # generate random actions
         rand_prob = .01
-
         np.random.seed(np.random.randint(10000))
-
         t = np.random.uniform(0., 1.)
 
         if t < rand_prob:
-            self.action = np.random.uniform(-1., 1., (2,))
+            self.action = np.random.uniform(-0.05, 1., (2,))
         else:
             self.action += np.random.uniform(-0.1, 0.1, (2,))
-        action = self.action
 
+        action = self.action
         return action
 
     def set_model_params(self, model_params):
@@ -104,15 +103,12 @@ class Model:
             data = json.load(f)
         print('loading file %s' % (filename))
         self.data = data
-        model_params = np.array(data[0])  # assuming other stuff is in data
+        model_params = np.array(data[0])
         self.set_model_params(model_params)
-        # also load the vae and rnn
-        self.env.vae.load_json('tf_models/vae.json')
-        self.env.rnn.load_json('tf_models/rnn.json')
+        self.env.vae.load_json('dreamduck/envs/tf_vae/vae.json')
+        self.env.rnn.load_json('dreamduck/envs/tf_rnn/rnn.json')
 
     def get_random_model_params(self, stdev=0.1):
-        # return np.random.randn(self.param_count)*stdev
-        # spice things up!
         return np.random.standard_cauchy(self.param_count)*stdev
 
     def init_random_model_params(self, stdev=0.1):
@@ -137,10 +133,9 @@ def evaluate(model):
 
 
 def simulate(model, train_mode=False, render_mode=True, num_episode=5, seed=-1, max_len=-1):
-
     reward_list = []
     t_list = []
-
+    # TODO: Change
     max_episode_length = 2100
 
     if train_mode and max_len > 0:
@@ -152,8 +147,7 @@ def simulate(model, train_mode=False, render_mode=True, num_episode=5, seed=-1, 
         model.env.seed(seed)
 
     for episode in range(num_episode):
-
-        obs = model.env.reset()
+        obs = model.env._reset()
 
         if obs is None:
             obs = np.zeros(model.input_size)
@@ -163,20 +157,18 @@ def simulate(model, train_mode=False, render_mode=True, num_episode=5, seed=-1, 
         for t in range(max_episode_length):
 
             if render_mode:
-                model.env.render("human")
+                model.env._render("human")
                 if RENDER_DELAY:
                     time.sleep(0.01)
 
             action = model.get_action(obs)
-
-            prev_obs = obs
-
-            obs, reward, done, info = model.env.step(action)
+            #  prev_obs = obs
+            obs, reward, done, info = model.env._step(action)
 
             if (render_mode):
                 pass
-                #print("action", action, "step reward", reward)
-                #print("step reward", reward)
+                # print("action", action, "step reward", reward)
+                # print("step reward", reward)
             total_reward += reward
 
             if done:
@@ -198,7 +190,8 @@ def main():
     global final_mode
 
     assert len(
-        sys.argv) > 2, 'python model.py gamename render/norender path_to_model.json [seed]'
+        sys.argv) > 2, \
+        'python model.py gamename render/norender path_to_model.json [seed]'
 
     gamename = sys.argv[1]
 
@@ -206,7 +199,7 @@ def main():
 
     final_mode_string = str(sys.argv[2])
     if (final_mode_string == "render"):
-        final_mode = False  # don't run 100 times, just visualize results.
+        final_mode = False
 
     use_model = False
     if (len(sys.argv) > 3):
@@ -247,7 +240,7 @@ def main():
     else:
 
         reward, steps_taken = simulate(model,
-                                       train_mode=False, render_mode=render_mode, num_episode=1)
+            train_mode=False, render_mode=render_mode, num_episode=1)
         print("terminal reward", reward,
               "average steps taken", np.mean(steps_taken)+1)
 

@@ -31,15 +31,20 @@ class DuckieTownWrapper(DuckietownEnv):
         self.observation_space = Box(
             low=0, high=255, shape=(SCREEN_X, SCREEN_Y, 3))
 
-    def step(self, action):
+    def _step(self, action):
         obs, reward, done, _ = super(DuckieTownWrapper, self).step(action)
         if self.full_episode:
             return _process_frame(obs), reward, False, {}
         return _process_frame(obs), reward, done, {}
 
 
-def make_env(seed=-1, full_episode=False):
-    env = DuckieTownWrapper(full_episode=full_episode)
+def make_env(env_name, seed=-1, render_mode=True, load_model=True):
+    if env_name == 'rnnenv':
+        from rnnenv import DuckieTownRNN
+        env = DuckieTownRNN(render_mode=True, load_model=load_model)
+    elif env_name == 'realenv':
+        from realenv import DuckieTownReal
+        env = DuckieTownReal(render_mode=True, load_model=load_model)
     if seed >= 0:
         env.seed(seed)
     return env
