@@ -46,6 +46,12 @@ All three environment/representations are available to test out manually:
 
 2. World Model Interpretation of the real environment `pytho dreamduck/envs/realenv.py`
 
+## Run simulation with random actions
+
+- `python dreamduck/envs/model.py realenv render`
+- `python dreamduck/envs/model.py rnnenv render`
+
+
 ### Training
 
 ## baselines
@@ -60,8 +66,7 @@ Usage like and with `baselines===0.1.5`:
 
 It is also possible to train an agent with ES like they did it in World Models:
 
-1. `cd dreamduck/envs; python train.py`
-
+1. `python dreamduck/envs/train.py`
 
 ## Run pre-trained model
 

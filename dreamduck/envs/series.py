@@ -4,11 +4,8 @@ all the dataset files into one dataset called series/series.npz
 '''
 
 from vae.vae import reset_graph, ConvVAE
-import random
 import numpy as np
 import os
-import json
-import tensorflow as tf
 np.set_printoptions(precision=4, edgeitems=6, linewidth=100, suppress=True)
 
 
@@ -27,7 +24,6 @@ def load_raw_data_list(filelist):
     action_list = []
     restart_list = []
     reward_list = []
-    counter = 0
     for i in range(len(filelist)):
         filename = filelist[i]
         raw_data = np.load(os.path.join(DATA_DIR, filename))
@@ -107,5 +103,9 @@ logvar_dataset = np.array(logvar_dataset)
 restart_dataset = np.array(restart_dataset)
 reward_dataset = np.array(reward_dataset)
 
-np.savez_compressed(os.path.join(SERIES_DIR, "series.npz"), action=action_dataset, mu=mu_dataset, logvar=logvar_dataset,
-                    restart=restart_dataset, reward=reward_dataset)
+np.savez_compressed(os.path.join(SERIES_DIR, "series.npz"),
+                    action=action_dataset,
+                    mu=mu_dataset,
+                    logvar=logvar_dataset,
+                    restart=restart_dataset,
+                    reward=reward_dataset)

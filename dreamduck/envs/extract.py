@@ -9,15 +9,15 @@ MAX_FRAMES = 150
 MAX_TRIALS = 4000
 MIN_LENGTH = 50
 
-render_mode = False  # for debugging.
+render_mode = True # for debugging.
 
-full_episode = True
+full_episode = False
 
 DIR_NAME = 'record'
 if not os.path.exists(DIR_NAME):
     os.makedirs(DIR_NAME)
 
-model = make_model(config.games['duckietown'])
+model = make_model(config.games['default'])
 
 total_frames = 0
 model.make_env(render_mode=render_mode, full_episode=full_episode)
@@ -42,7 +42,7 @@ for trial in range(MAX_TRIALS):
         for frame in range(MAX_FRAMES):
             if render_mode:
                 model.env.render("human")
-            action = model.get_action(obs)  # use more diverse random policy:
+            action = model.get_action(obs)
             recording_obs.append(obs)
             recording_action.append(action)
             obs, reward, done, info = model.env.step(action)
@@ -67,7 +67,7 @@ for trial in range(MAX_TRIALS):
                                 restart=recording_restart,
                                 reward=recording_reward)
     except gym.error.Error:
-        print("stupid doom error, life goes on")
+        print("duckietown error")
         model.env.close()
         model.make_env(render_mode=render_mode)
         continue

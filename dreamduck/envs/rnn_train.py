@@ -1,8 +1,3 @@
-'''
-train mdn-rnn from pre-processed data.
-also save 1000 initial mu and logvar, for generative experiments (not related to training).
-'''
-
 import numpy as np
 import os
 import json
@@ -109,8 +104,7 @@ def create_batches(all_data, batch_size=100, seq_length=500):
         data_action[idx:idx+N] = action.reshape(N, 2)
         data_restart[idx:idx+N] = restart.reshape(N)
         data_reward[idx:idx+N] = reward.reshape(N)
-
-        #data_restart[idx] = 1
+        # data_restart[idx] = 1
         idx += N
 
     data_mu = data_mu[0:num_frames_adjusted]
@@ -197,8 +191,15 @@ for epoch in range(1, 401):
                 model.initial_state: batch_state,
                 model.lr: curr_learning_rate}
 
-        (train_cost, z_cost, r_cost, batch_state, train_step, _) = model.sess.run(
-            [model.cost, model.z_cost, model.r_cost, model.final_state, model.global_step, model.train_op], feed)
+        (train_cost, z_cost, r_cost, batch_state, train_step, _) = \
+            model.sess.run([
+                model.cost,
+                model.z_cost,
+                model.r_cost,
+                model.final_state,
+                model.global_step,
+                model.train_op
+            ], feed)
         if (step % 20 == 0 and step > 0):
             end = time.time()
             time_taken = end-start

@@ -6,16 +6,23 @@ Game = namedtuple('Game', ['env_name', 'input_size',
 
 games = {}
 
-rnnenv = Game(env_name='rnnenv',
+rnnenv = Game(env_name='default',
               input_size=576+512*1,
-              output_size=1,
+              output_size=2,
               activation='tanh',
               )
-games['rnnenv'] = rnnenv
+games['default'] = rnnenv
 
 realenv = Game(env_name='realenv',
                input_size=576+512*1,
-               output_size=1,
+               output_size=2,
                activation='tanh',
                )
 games['realenv'] = realenv
+
+rnnenv = Game(env_name='rnnenv',
+              input_size=576+512*1,
+              output_size=2,
+              activation='tanh',
+              )
+games['rnnenv'] = rnnenv

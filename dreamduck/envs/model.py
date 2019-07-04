@@ -41,7 +41,7 @@ class Model:
     ''' simple feedforward model '''
 
     def __init__(self, game):
-        self.action = np.random.uniform(-1., 1., (2,))
+        self.action = np.random.uniform(-0.05, 1., (2,))
 
         self.noise_level = 0.0
         self.env_name = game.env_name
@@ -69,10 +69,11 @@ class Model:
 
         self.render_mode = False
 
-    def make_env(self, seed=-1, render_mode=False, load_model=True):
+    def make_env(self, seed=-1, render_mode=False, load_model=True,
+                 full_episode=True):
         self.render_mode = render_mode
         self.env = make_env(self.env_name, seed=seed, render_mode=render_mode,
-                            load_model=load_model)
+                            load_model=load_model,full_episode=full_episode)
 
     def get_action(self, z):
         # generate random actions
