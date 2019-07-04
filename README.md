@@ -52,9 +52,9 @@ All three environment/representations are available to test out manually:
 - `python dreamduck/envs/model.py rnnenv render`
 
 
-### Training
+## Training
 
-## baselines
+### baselines
 
 Usage like and with `baselines===0.1.5`:
 
@@ -62,7 +62,7 @@ Usage like and with `baselines===0.1.5`:
 
 - `python -m baselines.run --alg=ppo2 --env=DreamDuck-v0 --num_timesteps=0 --load_path=./models/dreamduck__ppo2 --play`
 
-## CMA-ES
+### CMA-ES
 
 It is also possible to train an agent with ES like they did it in World Models:
 
@@ -70,8 +70,8 @@ It is also possible to train an agent with ES like they did it in World Models:
 
 ## Run pre-trained model
 
-- `python dreamduck/envs/model.py realenv render dreamduck/envs/log/rnnenv.cma.16.2.json`
-- `python dreamduck/envs/model.py rnnenv render dreamduck/envs/log/rnnenv.cma.16.2.json`
+- `python dreamduck/envs/model.py realenv render log/rnnenv.cma.16.2.json`
+- `python dreamduck/envs/model.py rnnenv render log/rnnenv.cma.16.2.json`
 
 ## Pipeline
 
