@@ -7,10 +7,15 @@ and [baselines](https://github.com/Bassstring/baselines).
 There are three gym environments provided:
 
 1. DreamDuck-v0 default environment `dreamduck/envs/env.py`
+<p align="center">
+<img src="media/default.png"><br>
+</p>
+
 2. DreamDuck-v1 world model compressed observation `dreamduck/envs/realenv.py`
 <p align="center">
 <img src="media/real.png"><br>
 </p>
+
 3. DreamDuck-v2 dream environment `dreamduck/envs/rnnenv.py`
 <p align="center">
 <img src="media/dream.gif"><br>
