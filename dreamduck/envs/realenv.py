@@ -104,7 +104,7 @@ class DuckieTownReal(DuckieTownWrapper):
         simple_obs = np.copy(img).astype(np.float)/255.0
         simple_obs = simple_obs.reshape(1, SCREEN_X, SCREEN_Y, 3)
         mu, logvar = self.vae.encode_mu_logvar(simple_obs)
-        return (mu + np.exp(logvar/2.0) \
+        return (mu + np.exp(logvar/2.0)
                 * self.np_random.randn(*logvar.shape))[0]
 
     def _decode(self, z):

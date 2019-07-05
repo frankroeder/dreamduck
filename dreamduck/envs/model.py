@@ -5,6 +5,9 @@ import sys
 import config
 from env import make_env
 import time
+import os
+from dreamduck.envs.rnn.rnn import rnn_model_path_name
+from dreamduck.envs.vae.vae import vae_model_path_name
 
 final_mode = True
 render_mode = True
@@ -73,7 +76,7 @@ class Model:
                  full_episode=True):
         self.render_mode = render_mode
         self.env = make_env(self.env_name, seed=seed, render_mode=render_mode,
-                            load_model=load_model,full_episode=full_episode)
+                            load_model=load_model, full_episode=full_episode)
 
     def get_action(self, z):
         # generate random actions
@@ -106,8 +109,8 @@ class Model:
         self.data = data
         model_params = np.array(data[0])
         self.set_model_params(model_params)
-        self.env.vae.load_json('dreamduck/envs/tf_vae/vae.json')
-        self.env.rnn.load_json('dreamduck/envs/tf_rnn/rnn.json')
+        self.env.vae.load_json(os.path.join(vae_model_path_name, 'vae.json'))
+        self.env.rnn.load_json(os.path.join(rnn_model_path_name, 'rnn.json'))
 
     def get_random_model_params(self, stdev=0.1):
         return np.random.standard_cauchy(self.param_count)*stdev

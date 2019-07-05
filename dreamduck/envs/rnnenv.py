@@ -1,6 +1,7 @@
 import numpy as np
 import json
 import sys
+import argparse
 from gym import spaces
 from gym.spaces.box import Box
 from dreamduck.envs.rnn.rnn import reset_graph, rnn_model_path_name,\
@@ -14,8 +15,7 @@ import gym
 
 SCREEN_X = 64
 SCREEN_Y = 64
-#  TEMPERATURE = 1.25
-TEMPERATURE = 0.75
+TEMPERATURE = 1.25
 
 model_path_name = 'dreamduck/envs/tf_initial_z'
 
@@ -206,6 +206,12 @@ class DuckieTownRNN(gym.Env):
 if __name__ == "__main__":
 
     env = DuckieTownRNN(render_mode=True)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--temp', default=.75, type=float
+                        , help='Control uncertainty')
+    args = parser.parse_args()
+    TEMPERATURE = args.temp
+    args = parser.parse_args()
     from pyglet.window import key
     a = np.array([0.0, 0.0])
     overwrite = False

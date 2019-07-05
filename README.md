@@ -4,14 +4,19 @@ This repository is an implementation of the [WorldModelsExperiments](https://git
 combined with forks of [gym-duckietown](https://github.com/Bassstring/gym-duckietown)
 and [baselines](https://github.com/Bassstring/baselines).
 
-There are three gym environment provided:
+There are three gym environments provided:
 
 1. DreamDuck-v0 default environment `dreamduck/envs/env.py`
 2. DreamDuck-v1 world model compressed observation `dreamduck/envs/realenv.py`
+<p align="center">
+<img src="media/real.png"><br>
+</p>
 3. DreamDuck-v2 dream environment `dreamduck/envs/rnnenv.py`
+<p align="center">
+<img src="media/dream.gif"><br>
+</p>
 
-To train the world model from scratch follow the introductions in
-[this](https://github.com/Bassstring/dreamduck/blob/master/dreamduck/envs/README.md) readme.
+To train the world model from scratch jump to section __Training__.
 
 ## Getting Started
 
@@ -19,6 +24,8 @@ To train the world model from scratch follow the introductions in
 
 1. Create a virtual environment with `python/python3 -m venv venv` and activate
   it with `source venv/bin/activate`
+  - If the module is not present run `sudo apt-get install python3-venv`
+  - Or make use of instructions for other OS
 
 2. Install dependencies `pip install -r ./dreamduck/envs/requirements.txt`
 
@@ -34,7 +41,7 @@ All three environment/representations are available to test out manually:
 ### Default environment
 
 - `python dreamduck/envs/env.py`
-- For help `python dreamduck/envs/env.py -h`
+- Use the flag `-h` for all options
 
 ### World Model Interpretation of the real Environment
 
@@ -43,8 +50,7 @@ All three environment/representations are available to test out manually:
 ### Dreaming without real Environment
 
 - `python dreamduck/envs/rnnenv.py`
-
-2. World Model Interpretation of the real environment `pytho dreamduck/envs/realenv.py`
+- Make use of flag `--temp` to control uncertainty
 
 ## Run simulation with random actions
 
@@ -92,11 +98,22 @@ These scripts are executed in `dreamduck/envs`
 
 3. Create series with `series.py`
 
-4. Train the MDN-RNN with `python rnn_train.py`
+4. Train the MDN-RNN with `python rnn_train.py` and validate its performance
 
 5. Train the agent
-  - Goto section Training of this README
+
+
+## Running headless training with xvfb
+
+- Install xvfb `sudo apt install xvfb -y`
+- Run `xvfb-run -a -s "-screen 0 1400x900x24 +extension RANDR" -- python -m
+  baselines.run --alg=ppo2 --env=DreamDuck-v0 --num_timesteps=2e7
+  --network=cnn_lstm --num_env=8 --save_path=./models/dreamduck_cnn_lstm_ppo2
+  --log_path=train_logs`
+
+If there are issues follow [this](https://github.com/duckietown/gym-duckietown#running-headless-and-training-in-a-cloud-based-environment-aws)
+instructions.
 
 ## Authors
 
-Frank Röder & Shahd Safarani
+[Frank Röder](https://frankyroeder.de) & Shahd Safarani
