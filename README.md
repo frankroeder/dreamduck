@@ -30,7 +30,7 @@ To train the world model from scratch jump to section __Training__.
 1. Create a virtual environment with `python/python3 -m venv venv` and activate
   it with `source venv/bin/activate`
   - If the module is not present run `sudo apt-get install python3-venv`
-  - Or make use of instructions for other OS
+  - Otherwise make use of instructions for other OS
 
 2. Install dependencies `pip install -r ./dreamduck/envs/requirements.txt`
 
@@ -41,7 +41,7 @@ To train the world model from scratch jump to section __Training__.
 
 ## Manual Control
 
-All three environment/representations are available to test out manually:
+All three environments can be controlled manually:
 
 ### Default environment
 
@@ -62,12 +62,12 @@ All three environment/representations are available to test out manually:
 - `python dreamduck/envs/model.py realenv render`
 - `python dreamduck/envs/model.py rnnenv render`
 
-
 ## Training
 
-### baselines
+### baselines (0.1.5)
 
-Usage like and with `baselines===0.1.5`:
+The baselines module provide a straightforward way of training an agent
+with different algorithms and settings out of the box.
 
 - `python -m baselines.run --alg=ppo2 --env=DreamDuck-v0 --num_timesteps=2e7 --num_env=4 --save_path=./models/dreamduck__ppo2 --log_path=train_logs`
 
@@ -75,14 +75,14 @@ Usage like and with `baselines===0.1.5`:
 
 ### CMA-ES
 
-It is also possible to train an agent with ES like they did it in World Models:
+It is also possible to train an agent with [Covariance Matrix Adaptation Evolution
+Strategy (CMA-ES)](https://github.com/CMA-ES/pycma) like they did it in [WorldModelsExperiments](https://github.com/hardmaru/WorldModelsExperiments):
 
-1. `python dreamduck/envs/train.py`
+- `python dreamduck/envs/train.py`
 
 ## Run pre-trained model
 
-- `python dreamduck/envs/model.py realenv render log/rnnenv.cma.16.2.json`
-- `python dreamduck/envs/model.py rnnenv render log/rnnenv.cma.16.2.json`
+- `python dreamduck/envs/model.py [realenv,rnnenv] render log/rnnenv.cma.16.2.json`
 
 ## Pipeline
 
@@ -117,7 +117,7 @@ These scripts are executed in `dreamduck/envs`
   --log_path=train_logs`
 
 If there are issues follow [this](https://github.com/duckietown/gym-duckietown#running-headless-and-training-in-a-cloud-based-environment-aws)
-instructions.
+instruction.
 
 ## Authors
 
