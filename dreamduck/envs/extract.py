@@ -9,7 +9,7 @@ MAX_FRAMES = 150
 MAX_TRIALS = 4000
 MIN_LENGTH = 50
 
-render_mode = True # for debugging.
+render_mode = False  # for debugging.
 
 full_episode = False
 
