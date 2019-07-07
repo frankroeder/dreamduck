@@ -73,6 +73,10 @@ with different algorithms and settings out of the box.
 
 - `python -m baselines.run --alg=ppo2 --env=DreamDuck-v0 --num_timesteps=0 --load_path=./models/dreamduck__ppo2 --play`
 
+For debugging purposes invoke baselines with following env variable:
+
+- `DEBUG_BASELINES=1 python -m baselines.run --alg=ppo2 ...`
+
 ### CMA-ES
 
 It is also possible to train an agent with [Covariance Matrix Adaptation Evolution
