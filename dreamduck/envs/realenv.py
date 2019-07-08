@@ -72,16 +72,16 @@ class DuckieTownReal(DuckieTownWrapper):
         prev_restart = np.ones((1, 1))
         prev_restart[0] = self.restart
 
-        prev_reward = np.ones((1, 1))
+        #prev_reward = np.ones((1, 1))
         # TODO: Is this right? If yes remove comment
-        prev_reward[0][0] = self.reward
+        #prev_reward[0][0] = self.reward
 
         s_model = self.rnn
 
         feed = {s_model.input_z: prev_z,
                 s_model.input_action: prev_action,
                 s_model.input_restart: prev_restart,
-                s_model.input_reward: prev_reward,
+                #s_model.input_reward: prev_reward,
                 s_model.initial_state: self.rnn_state
                 }
 

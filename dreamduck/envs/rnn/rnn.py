@@ -146,24 +146,24 @@ class MDNRNN():
             dtype=tf.float32,
             shape=[self.hps.batch_size, self.hps.max_seq_len])
 
-        self.batch_reward = tf.placeholder(
-            dtype=tf.float32,
-            shape=[self.hps.batch_size, self.hps.max_seq_len])
+        #self.batch_reward = tf.placeholder(
+        #    dtype=tf.float32,
+        #    shape=[self.hps.batch_size, self.hps.max_seq_len])
 
         self.input_z = self.batch_z[:, :LENGTH, :]
         self.input_action = self.batch_action[:, :LENGTH]
         self.input_restart = self.batch_restart[:, :LENGTH]
-        self.input_reward = self.batch_reward[:, :LENGTH]
+        #self.input_reward = self.batch_reward[:, :LENGTH]
 
         self.target_z = self.batch_z[:, 1:, :]
         self.target_restart = self.batch_restart[:, 1:]
-        self.target_reward = self.batch_reward[:, 1:]
+        #self.target_reward = self.batch_reward[:, 1:]
 
         self.input_seq = tf.concat([
             self.input_z,
             tf.reshape(self.input_action, [self.hps.batch_size, LENGTH, 2]),
             tf.reshape(self.input_restart, [self.hps.batch_size, LENGTH, 1]),
-            tf.reshape(self.input_reward, [self.hps.batch_size, LENGTH, 1])
+            #tf.reshape(self.input_reward, [self.hps.batch_size, LENGTH, 1])
         ], axis=2)
 
         self.zero_state = cell.zero_state(
@@ -206,7 +206,7 @@ class MDNRNN():
         output = tf.reshape(tf.concat(outputs, axis=1),
                             [-1, self.hps.rnn_size])
 
-        NOUT = WIDTH * KMIX * 3 + 2  # plus 1 to predict the restart state.
+        NOUT = WIDTH * KMIX * 3 + 1  # plus 1 to predict the restart state.
 
         with tf.variable_scope('RNN'):
             output_w = tf.get_variable("output_w", [self.hps.rnn_size, NOUT])
@@ -216,8 +216,8 @@ class MDNRNN():
         output = tf.nn.xw_plus_b(output, output_w, output_b)
 
         self.out_restart_logits = output[:, 0]
-        self.out_reward_logits = output[:, 1]
-        output = output[:, 2:]
+        #self.out_reward_logits = output[:, 1]
+        output = output[:, 1:]
 
         output = tf.reshape(output, [-1, KMIX * 3])
         self.final_state = final_state
@@ -262,13 +262,13 @@ class MDNRNN():
 
         self.r_cost = tf.reduce_mean(tf.multiply(factor, self.r_cost))
 
-        self.reward_logits = tf.nn.tanh(self.out_reward_logits)
-        self.reward_cost = tf.norm(
-            tf.reshape(self.target_reward,
-                       [-1, 1])-tf.reshape(self.reward_logits, [-1, 1]),
-            ord='euclidean')
+        #self.reward_logits = tf.nn.tanh(self.out_reward_logits)
+        #self.reward_cost = tf.norm(
+        #    tf.reshape(self.target_reward,
+        #               [-1, 1])-tf.reshape(self.reward_logits, [-1, 1]),
+        #    ord='euclidean')
 
-        self.cost = self.z_cost + self.r_cost + self.reward_cost
+        self.cost = self.z_cost + self.r_cost #+ self.reward_cost
 
         if self.hps.is_training == 1:
             self.lr = tf.Variable(self.hps.learning_rate, trainable=False)

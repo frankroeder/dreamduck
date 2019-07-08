@@ -87,6 +87,7 @@ total_episodes = len(filelist)
 ep_batches = int(np.floor(total_episodes/episode_num))
 print("ep_batches", ep_batches)
 
+
 reset_graph()
 
 vae = ConvVAE(z_size=z_size,

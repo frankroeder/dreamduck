@@ -23,17 +23,17 @@ def load_raw_data_list(filelist):
     data_list = []
     action_list = []
     restart_list = []
-    reward_list = []
+    #reward_list = []
     for i in range(len(filelist)):
         filename = filelist[i]
         raw_data = np.load(os.path.join(DATA_DIR, filename))
         data_list.append(raw_data['obs'])
         action_list.append(raw_data['action'])
         restart_list.append(raw_data['restart'])
-        reward_list.append(raw_data['reward'])
+        #reward_list.append(raw_data['reward'])
         if ((i+1) % 1000 == 0):
             print("loading file", (i+1))
-    return data_list, action_list, restart_list, reward_list
+    return data_list, action_list, restart_list#, reward_list
 
 
 def encode(img):
@@ -62,7 +62,7 @@ filelist = os.listdir(DATA_DIR)
 filelist.sort()
 filelist = filelist[:10000]
 
-dataset, action_dataset, restart_dataset, reward_dataset = load_raw_data_list(
+dataset, action_dataset, restart_dataset = load_raw_data_list(
     filelist)
 
 reset_graph()
@@ -101,11 +101,10 @@ action_dataset = np.array(action_dataset)
 mu_dataset = np.array(mu_dataset)
 logvar_dataset = np.array(logvar_dataset)
 restart_dataset = np.array(restart_dataset)
-reward_dataset = np.array(reward_dataset)
+#reward_dataset = np.array(reward_dataset)
 
 np.savez_compressed(os.path.join(SERIES_DIR, "series.npz"),
                     action=action_dataset,
                     mu=mu_dataset,
                     logvar=logvar_dataset,
-                    restart=restart_dataset,
-                    reward=reward_dataset)
+                    restart=restart_dataset)

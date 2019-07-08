@@ -54,14 +54,14 @@ hps_sample = hps_model._replace(
     batch_size=1, max_seq_len=2, use_recurrent_dropout=0, is_training=0)
 
 # load preprocessed data
-raw_data = np.load(os.path.join(DATA_DIR, "series.npz"))
+raw_data = np.load(os.path.join(DATA_DIR, "series.npz"), allow_pickle=True)
 raw_data_mu = raw_data["mu"]
 raw_data_logvar = raw_data["logvar"]
 raw_data_action = raw_data["action"]
 raw_data_restart = raw_data["restart"]
-raw_data_reward = raw_data["reward"]
-raw_data_reward = (raw_data_reward - raw_data_reward.min()) / \
-    (raw_data_reward.max() - raw_data_reward.min()) * 2. + (-1.)
+#raw_data_reward = raw_data["reward"]
+#raw_data_reward = (raw_data_reward - raw_data_reward.min()) / \
+#    (raw_data_reward.max() - raw_data_reward.min()) * 2. + (-1.)
 
 
 def load_series_data():
@@ -71,8 +71,8 @@ def load_series_data():
         mu = raw_data_mu[i]
         logvar = raw_data_logvar[i]
         restart = raw_data_restart[i]
-        reward = raw_data_reward[i]
-        all_data.append([mu, logvar, action, restart, reward])
+        #reward = raw_data_reward[i]
+        all_data.append([mu, logvar, action, restart])
     return all_data
 
 
@@ -94,16 +94,16 @@ def create_batches(all_data, batch_size=100, seq_length=500):
     data_logvar = np.zeros((num_frames, N_z), dtype=np.float16)
     data_action = np.zeros((num_frames, 2), dtype=np.float16)
     data_restart = np.zeros(num_frames, dtype=np.uint8)
-    data_reward = np.zeros(num_frames, dtype=np.float16)
+    #data_reward = np.zeros(num_frames, dtype=np.float16)
     idx = 0
     for data in all_data:
-        mu, logvar, action, restart, reward = data
+        mu, logvar, action, restart = data
         N = len(action)
         data_mu[idx:idx+N] = mu.reshape(N, 64)
         data_logvar[idx:idx+N] = logvar.reshape(N, 64)
         data_action[idx:idx+N] = action.reshape(N, 2)
         data_restart[idx:idx+N] = restart.reshape(N)
-        data_reward[idx:idx+N] = reward.reshape(N)
+        #data_reward[idx:idx+N] = reward.reshape(N)
         # data_restart[idx] = 1
         idx += N
 
@@ -111,7 +111,7 @@ def create_batches(all_data, batch_size=100, seq_length=500):
     data_logvar = data_logvar[0:num_frames_adjusted]
     data_action = data_action[0:num_frames_adjusted]
     data_restart = data_restart[0:num_frames_adjusted]
-    data_reward = data_reward[0:num_frames_adjusted]
+    #data_reward = data_reward[0:num_frames_adjusted]
 
     data_mu = np.split(data_mu.reshape(batch_size, -1, 64), num_batches, 1)
     data_logvar = np.split(data_logvar.reshape(
@@ -120,21 +120,21 @@ def create_batches(all_data, batch_size=100, seq_length=500):
         batch_size, -1, 2), num_batches, 1)
     data_restart = np.split(data_restart.reshape(
         batch_size, -1), num_batches, 1)
-    data_reward = np.split(data_reward.reshape(
-        batch_size, -1), num_batches, 1)
+    #data_reward = np.split(data_reward.reshape(
+    #    batch_size, -1), num_batches, 1)
 
-    return data_mu, data_logvar, data_action, data_restart, data_reward
+    return data_mu, data_logvar, data_action, data_restart
 
 
-def get_batch(batch_idx, data_mu, data_logvar, data_action, data_restart, data_reward):
+def get_batch(batch_idx, data_mu, data_logvar, data_action, data_restart):
     batch_mu = data_mu[batch_idx]
     batch_logvar = data_logvar[batch_idx]
     batch_action = data_action[batch_idx]
     batch_restart = data_restart[batch_idx]
-    batch_reward = data_reward[batch_idx]
+    #batch_reward = data_reward[batch_idx]
     batch_s = batch_logvar.shape
     batch_z = batch_mu + np.exp(batch_logvar/2.0) * np.random.randn(*batch_s)
-    return batch_z, batch_action, batch_restart, batch_reward
+    return batch_z, batch_action, batch_restart #, batch_reward
 
 
 # process data
@@ -164,9 +164,9 @@ start = time.time()
 
 for epoch in range(1, 401):
     # print('preparing data for epoch', epoch)
-    data_mu, data_logvar, data_action, data_restart, data_reward = \
-        0, 0, 0, 0, 0
-    data_mu, data_logvar, data_action, data_restart, data_reward = \
+    data_mu, data_logvar, data_action, data_restart = \
+        0, 0, 0, 0
+    data_mu, data_logvar, data_action, data_restart = \
         create_batches(all_data)
     num_batches = len(data_mu)
     # print('number of batches', num_batches)
@@ -178,8 +178,8 @@ for epoch in range(1, 401):
 
     for local_step in range(num_batches):
 
-        batch_z, batch_action, batch_restart, batch_reward = get_batch(
-            local_step, data_mu, data_logvar, data_action, data_restart, data_reward)
+        batch_z, batch_action, batch_restart = get_batch(
+            local_step, data_mu, data_logvar, data_action, data_restart)
         step = model.sess.run(model.global_step)
         curr_learning_rate = (hps.learning_rate-hps.min_learning_rate) * \
             (hps.decay_rate) ** step + hps.min_learning_rate
@@ -187,7 +187,7 @@ for epoch in range(1, 401):
         feed = {model.batch_z: batch_z,
                 model.batch_action: batch_action,
                 model.batch_restart: batch_restart,
-                model.batch_reward: batch_reward,
+                #model.batch_reward: batch_reward,
                 model.initial_state: batch_state,
                 model.lr: curr_learning_rate}
 

@@ -7,6 +7,7 @@ from gym.spaces.box import Box
 from dreamduck.envs.rnn.rnn import reset_graph, rnn_model_path_name,\
     model_rnn_size, model_state_space, MDNRNN, hps_sample, get_pi_idx
 from dreamduck.envs.vae.vae import ConvVAE, vae_model_path_name
+from dreamduck.envs.env import DuckieTownWrapper
 import os
 from gym.utils import seeding
 from cv2 import resize
@@ -29,7 +30,7 @@ class DuckieTownRNN(gym.Env):
     }
 
     def __init__(self, render_mode=False, load_model=True):
-        super(gym.Env, self).__init__()
+        super(DuckieTownRNN, self).__init__()
         self.render_mode = render_mode
 
         with open(os.path.join(model_path_name, 'initial_z.json'), 'r') as f:
@@ -114,9 +115,9 @@ class DuckieTownRNN(gym.Env):
         prev_restart = np.ones((1, 1))
         prev_restart[0] = self.restart
 
-        prev_reward = np.ones((1, 1))
+        #prev_reward = np.ones((1, 1))
         # TODO: Is this right? If yes remove comment
-        prev_reward[0][0] = self.reward
+        #prev_reward[0][0] = self.reward
 
         s_model = self.rnn
         temperature = self.temperature
@@ -124,16 +125,16 @@ class DuckieTownRNN(gym.Env):
         feed = {s_model.input_z: prev_z,
                 s_model.input_action: prev_action,
                 s_model.input_restart: prev_restart,
-                s_model.input_reward: prev_reward,
+                #s_model.input_reward: prev_reward,
                 s_model.initial_state: self.rnn_state
                 }
 
-        [logmix, mean, logstd, logrestart, reward, next_state] = \
+        [logmix, mean, logstd, logrestart, next_state] = \
             s_model.sess.run([s_model.out_logmix,
                               s_model.out_mean,
                               s_model.out_logstd,
                               s_model.out_restart_logits,
-                              s_model.reward_logits,
+                              #s_model.reward_logits,
                               s_model.final_state],
                              feed)
 
@@ -166,8 +167,8 @@ class DuckieTownRNN(gym.Env):
         self.z = next_z
         self.restart = next_restart
         self.rnn_state = next_state
-
-        self.reward = reward
+        #_, reward, _, _ = super(DuckieTownRNN, self)._step(action)
+        reward = 1
 
         if self.frame_count >= self.max_frame:
             done = True
@@ -207,7 +208,7 @@ if __name__ == "__main__":
 
     env = DuckieTownRNN(render_mode=True)
     parser = argparse.ArgumentParser()
-    parser.add_argument('--temp', default=.75, type=float
+    parser.add_argument('--temp', default=.01, type=float
                         , help='Control uncertainty')
     args = parser.parse_args()
     TEMPERATURE = args.temp
@@ -246,7 +247,7 @@ if __name__ == "__main__":
 
     reward_list = []
 
-    for i in range(40):
+    for i in range(400):
         env._reset()
         total_reward = 0.0
         steps = 0
@@ -263,9 +264,9 @@ if __name__ == "__main__":
         while True:
             action = np.array([.0, .0])
             # TODO: We need this random actions?
-            if steps % repeat == 0:
-                action = np.random.uniform(-1., 1., (2,))
-                repeat = np.random.randint(1, 11)
+            #if steps % repeat == 0:
+            #    action = np.random.uniform(-1., 1., (2,))
+            #    repeat = np.random.randint(1, 11)
 
             if overwrite:
                 action = a

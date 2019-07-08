@@ -6,7 +6,7 @@ import tensorflow as tf
 import os
 
 
-vae_model_path_name = 'dreamduck/envs/vae/'
+vae_model_path_name = 'dreamduck/envs/tf_vae/'
 
 
 def reset_graph():
@@ -121,7 +121,7 @@ class ConvVAE(object):
 
     def _init_session(self):
         """Launch TensorFlow session and initialize variables"""
-        config = tf.ConfigProto()
+        config = tf.ConfigProto(log_device_placement=True)
         config.gpu_options.allow_growth = True
         self.sess = tf.Session(graph=self.g, config=config)
         self.sess.run(self.init)
