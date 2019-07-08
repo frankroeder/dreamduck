@@ -224,7 +224,8 @@ def main():
         model.load_model(filename)
     else:
         model.make_env(render_mode=render_mode, load_model=False)
-        model.init_random_model_params(stdev=np.random.rand()*0.01)
+        if gamename != 'default':
+            model.init_random_model_params(stdev=np.random.rand()*0.01)
 
     if final_mode:
         total_reward = 0.0
@@ -244,7 +245,7 @@ def main():
     else:
 
         reward, steps_taken = simulate(model,
-            train_mode=False, render_mode=render_mode, num_episode=1)
+                                       train_mode=False, render_mode=render_mode, num_episode=1)
         print("terminal reward", reward,
               "average steps taken", np.mean(steps_taken)+1)
 

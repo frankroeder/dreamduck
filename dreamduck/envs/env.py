@@ -37,6 +37,12 @@ class DuckieTownWrapper(DuckietownEnv):
             return _process_frame(obs), reward, False, {}
         return _process_frame(obs), reward, done, {}
 
+    def _render(self, mode='human'):
+        self.render()
+
+    def _reset(self):
+        self.reset()
+
 
 def make_env(env_name, seed=-1, render_mode=True, load_model=True,
              full_episode=True):
