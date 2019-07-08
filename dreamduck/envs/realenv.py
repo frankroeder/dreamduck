@@ -1,4 +1,5 @@
 import numpy as np
+import argparse
 from pyglet.window import key
 import sys
 import pyglet
@@ -15,7 +16,7 @@ import tensorflow as tf
 
 SCREEN_X = 64
 SCREEN_Y = 64
-DEBUG = True
+DEBUG = False
 
 
 def _process_frame(frame):
@@ -208,6 +209,11 @@ class DuckieTownReal(DuckieTownWrapper):
 
 if __name__ == "__main__":
     env = DuckieTownReal()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--debug', action='store_true',
+                        help='Shows world model view next to original obs')
+    args = parser.parse_args()
+    DEBUG = args.debug
     env._reset()
     env._render()
 

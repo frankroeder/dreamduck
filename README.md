@@ -51,6 +51,7 @@ All three environments can be controlled manually:
 ### World Model Interpretation of the real Environment
 
 - `python dreamduck/envs/realenv.py`
+- Show real observation next to world model interpretation with `--debug`
 
 ### Dreaming without real Environment
 

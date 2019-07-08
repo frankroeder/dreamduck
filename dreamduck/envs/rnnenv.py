@@ -208,11 +208,10 @@ if __name__ == "__main__":
 
     env = DuckieTownRNN(render_mode=True)
     parser = argparse.ArgumentParser()
-    parser.add_argument('--temp', default=.01, type=float
-                        , help='Control uncertainty')
+    parser.add_argument('--temp', default=.01, type=float,
+                        help='Control uncertainty')
     args = parser.parse_args()
     TEMPERATURE = args.temp
-    args = parser.parse_args()
     from pyglet.window import key
     a = np.array([0.0, 0.0])
     overwrite = False
@@ -264,9 +263,9 @@ if __name__ == "__main__":
         while True:
             action = np.array([.0, .0])
             # TODO: We need this random actions?
-            #if steps % repeat == 0:
-            #    action = np.random.uniform(-1., 1., (2,))
-            #    repeat = np.random.randint(1, 11)
+            #  if steps % repeat == 0:
+            #      action = np.random.uniform(-1., 1., (2,))
+            #      repeat = np.random.randint(1, 11)
 
             if overwrite:
                 action = a
