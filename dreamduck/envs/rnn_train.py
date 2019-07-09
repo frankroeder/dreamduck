@@ -163,7 +163,7 @@ model = MDNRNN(hps_model, gpu_mode=tf.test.is_gpu_available())
 hps = hps_model
 start = time.time()
 
-for epoch in range(1, 401):
+for epoch in range(1, 4000):
     # print('preparing data for epoch', epoch)
     data_mu, data_logvar, data_action, data_restart = \
         0, 0, 0, 0
@@ -208,6 +208,10 @@ for epoch in range(1, 401):
             output_log = "step: %d, lr: %.6f, cost: %.4f, z_cost: %.4f, r_cost: %.4f, train_time_taken: %.4f" % (
                 step, curr_learning_rate, train_cost, z_cost, r_cost, time_taken)
             print(output_log)
+        if step % 250 == 0 and step > 0:
+            model.save_json(os.path.join(
+                model_save_path, "rnn{}.json".format(step)
+            )
 
 
 # save the model (don't bother with tf checkpoints json all the way ...)

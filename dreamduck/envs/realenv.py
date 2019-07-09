@@ -180,14 +180,14 @@ class DuckieTownReal(DuckieTownWrapper):
             if small_img is None:
                 small_img = np.zeros(
                     shape=(SCREEN_X, SCREEN_Y, 3), dtype=np.uint8)
-            small_img = resize(small_img, (64, 64))
-            vae_img = self._decode(self.z)
-            vae_img = resize(vae_img, (64, 64))
 
-            check_img = resize(self._decode(self.check_obs), (64, 64))
-            img = np.concatenate((small_img, vae_img, check_img), axis=1)
-            if not DEBUG:
-                img = vae_img
+            small_img = resize(small_img, (64, 64))
+            vae_img = resize(self._decode(self.z), (64, 64))
+
+            img = vae_img
+            if DEBUG:
+                check_img = resize(self._decode(self.check_obs), (64, 64))
+                img = np.concatenate((small_img, vae_img, check_img), axis=1)
             if mode == 'rgb_array':
                 return img
             elif mode == 'human':
