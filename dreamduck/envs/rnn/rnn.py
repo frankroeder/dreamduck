@@ -344,7 +344,7 @@ def rnn_output_size(mode):
         return (64+256+256)
     if (mode == MODE_ZC) or (mode == MODE_ZH):
         return (64+256)
-    return   # MODE_Z or MODE_Z_HIDDEN
+    return 64  # MODE_Z or MODE_Z_HIDDEN
 
 
 def rnn_output(state, z, mode):

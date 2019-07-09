@@ -108,13 +108,6 @@ class Model:
 
     def get_action(self, z):
         h = rnn_output(self.state, z, EXP_MODE)
-
-        '''
-        action = np.dot(h, self.weight) + self.bias
-        action[0] = np.tanh(action[0])
-        action[1] = sigmoid(action[1])
-        action[2] = clip(np.tanh(action[2]))
-        '''
         if EXP_MODE == MODE_Z_HIDDEN: # one hidden layer
             h = np.tanh(np.dot(h, self.weight_hidden) + self.bias_hidden)
             action = np.tanh(np.dot(h, self.weight_output) + self.bias_output)
@@ -137,8 +130,8 @@ class Model:
             self.bias_hidden = params_1[:self.hidden_size]
             self.weight_hidden = params_1[self.hidden_size:].reshape(
                 self.input_size, self.hidden_size)
-            self.bias_output = params_2[:3]
-            self.weight_output = params_2[3:].reshape(self.hidden_size, 3)
+            self.bias_output = params_2[:2]
+            self.weight_output = params_2[2:].reshape(self.hidden_size, 3)
         else:
             self.bias = np.array(model_params[:3])
             self.weight = np.array(
