@@ -7,7 +7,7 @@ from gym import spaces
 from gym.spaces.box import Box
 from dreamduck.envs.env import DuckieTownWrapper
 from dreamduck.envs.rnn.rnn import reset_graph, rnn_model_path_name, \
-    model_rnn_size, model_state_space, MDNRNN, hps_sample
+    model_rnn_size, model_state_space, MDNRNN, hps_sample, get_pi_idx
 from dreamduck.envs.vae.vae import ConvVAE, vae_model_path_name
 import os
 from cv2 import resize
@@ -61,6 +61,7 @@ class DuckieTownReal(DuckieTownWrapper):
         self.viewer = None
         self._reset()
         self.reward = 0
+        self.check_obs = np.zeros((1, 1, self.outwidth))
 
     def _step(self, action):
         self.frame_count += 1
@@ -86,7 +87,38 @@ class DuckieTownReal(DuckieTownWrapper):
                 s_model.initial_state: self.rnn_state
                 }
 
-        self.rnn_state = s_model.sess.run(s_model.final_state, feed)
+        #  self.rnn_state = s_model.sess.run(s_model.final_state, feed)
+        [logmix, mean, logstd, logrestart, next_state] = \
+            s_model.sess.run([s_model.out_logmix,
+                              s_model.out_mean,
+                              s_model.out_logstd,
+                              s_model.out_restart_logits,
+                              # s_model.reward_logits,
+                              s_model.final_state],
+                             feed)
+
+        self.rnn_state = next_state
+        OUTWIDTH = self.outwidth
+
+        # adjust temperatures
+        temperature = 0
+        logmix2 = np.copy(logmix)/temperature
+        logmix2 -= logmix2.max()
+        logmix2 = np.exp(logmix2)
+        logmix2 /= logmix2.sum(axis=1).reshape(OUTWIDTH, 1)
+
+        mixture_idx = np.zeros(OUTWIDTH)
+        chosen_mean = np.zeros(OUTWIDTH)
+        chosen_logstd = np.zeros(OUTWIDTH)
+        for j in range(OUTWIDTH):
+            idx = get_pi_idx(self.np_random.rand(), logmix2[j])
+            mixture_idx[j] = idx
+            chosen_mean[j] = mean[j][idx]
+            chosen_logstd[j] = logstd[j][idx]
+
+        rand_gaussian = self.np_random.randn(OUTWIDTH)*np.sqrt(temperature)
+        next_z = chosen_mean+np.exp(chosen_logstd) * rand_gaussian
+        self.check_obs = next_z
 
         obs, reward, done, _ = super(DuckieTownReal, self)._step(action)
         small_obs = _process_frame(obs)
@@ -151,7 +183,9 @@ class DuckieTownReal(DuckieTownWrapper):
             small_img = resize(small_img, (64, 64))
             vae_img = self._decode(self.z)
             vae_img = resize(vae_img, (64, 64))
-            img = np.concatenate((small_img, vae_img), axis=1)
+
+            check_img = resize(self._decode(self.check_obs), (64, 64))
+            img = np.concatenate((small_img, vae_img, check_img), axis=1)
             if not DEBUG:
                 img = vae_img
             if mode == 'rgb_array':

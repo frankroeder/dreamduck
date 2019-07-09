@@ -77,7 +77,7 @@ def reset_graph():
 class MDNRNN():
     def __init__(self, hps, gpu_mode=True, reuse=False):
         self.hps = hps
-        with tf.variable_scope('mdn_rnn', reuse=reuse):
+        with tf.compat.v1.variable_scope('mdn_rnn', reuse=reuse):
             if not gpu_mode:
                 with tf.device("/cpu:0"):
                     print("model using cpu")
@@ -192,11 +192,11 @@ class MDNRNN():
 
                     c, h = state
 
-                    c = tf.where(restart_flag, zero_c, c)
-                    h = tf.where(restart_flag, zero_h, h)
+                    c = np.where(restart_flag, zero_c, c)
+                    h = np.where(restart_flag, zero_h, h)
 
                     output, state = cell(
-                        inp, tf.nn.rnn_cell.LSTMStateTuple(c, h))
+                        inp, tf.compat.v1.nn.rnn_cell.LSTMStateTuple(c, h))
                     outputs.append(output)
 
             return outputs, state
@@ -209,11 +209,11 @@ class MDNRNN():
         NOUT = WIDTH * KMIX * 3 + 1  # plus 1 to predict the restart state.
 
         with tf.variable_scope('RNN'):
-            output_w = tf.get_variable("output_w", [self.hps.rnn_size, NOUT])
-            output_b = tf.get_variable("output_b", [NOUT])
+            output_w = tf.compat.v1.get_variable("output_w", [self.hps.rnn_size, NOUT])
+            output_b = tf.compat.v1.get_variable("output_b", [NOUT])
 
         output = tf.reshape(output, [-1, hps.rnn_size])
-        output = tf.nn.xw_plus_b(output, output_w, output_b)
+        output = tf.compat.v1.nn.xw_plus_b(output, output_w, output_b)
 
         self.out_restart_logits = output[:, 0]
         #self.out_reward_logits = output[:, 1]
@@ -272,7 +272,7 @@ class MDNRNN():
 
         if self.hps.is_training == 1:
             self.lr = tf.Variable(self.hps.learning_rate, trainable=False)
-            optimizer = tf.train.AdamOptimizer(self.lr)
+            optimizer = tf.compat.v1.train.AdamOptimizer(self.lr)
 
             gvs = optimizer.compute_gradients(self.cost)
             capped_gvs = [(tf.clip_by_value(
@@ -281,7 +281,7 @@ class MDNRNN():
                 capped_gvs, global_step=self.global_step, name='train_step')
 
         # initialize vars
-        self.init = tf.global_variables_initializer()
+        self.init = tf.compat.v1.global_variables_initializer()
 
         t_vars = tf.trainable_variables()
         self.assign_ops = {}

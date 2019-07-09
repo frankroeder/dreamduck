@@ -6,6 +6,7 @@ final model saved into tf_vae/vae.json
 from vae.vae import reset_graph, ConvVAE
 import numpy as np
 import os
+import tensorflow as tf
 # can just override for multi-gpu systems
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
@@ -96,7 +97,7 @@ vae = ConvVAE(z_size=z_size,
               kl_tolerance=kl_tolerance,
               is_training=True,
               reuse=False,
-              gpu_mode=True)
+              gpu_mode=tf.test.is_gpu_available())
 
 # train loop:
 print("train", "step", "loss", "recon_loss", "kl_loss")

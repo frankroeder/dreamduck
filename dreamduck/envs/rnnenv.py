@@ -115,9 +115,9 @@ class DuckieTownRNN(gym.Env):
         prev_restart = np.ones((1, 1))
         prev_restart[0] = self.restart
 
-        #prev_reward = np.ones((1, 1))
+        # prev_reward = np.ones((1, 1))
         # TODO: Is this right? If yes remove comment
-        #prev_reward[0][0] = self.reward
+        # prev_reward[0][0] = self.reward
 
         s_model = self.rnn
         temperature = self.temperature
@@ -125,7 +125,7 @@ class DuckieTownRNN(gym.Env):
         feed = {s_model.input_z: prev_z,
                 s_model.input_action: prev_action,
                 s_model.input_restart: prev_restart,
-                #s_model.input_reward: prev_reward,
+                # s_model.input_reward: prev_reward,
                 s_model.initial_state: self.rnn_state
                 }
 
@@ -134,7 +134,7 @@ class DuckieTownRNN(gym.Env):
                               s_model.out_mean,
                               s_model.out_logstd,
                               s_model.out_restart_logits,
-                              #s_model.reward_logits,
+                              # s_model.reward_logits,
                               s_model.final_state],
                              feed)
 
@@ -156,7 +156,7 @@ class DuckieTownRNN(gym.Env):
             chosen_logstd[j] = logstd[j][idx]
 
         rand_gaussian = self.np_random.randn(OUTWIDTH)*np.sqrt(temperature)
-        next_z = chosen_mean+np.exp(chosen_logstd)*rand_gaussian
+        next_z = chosen_mean+np.exp(chosen_logstd) * rand_gaussian
 
         next_restart = 0
         done = False
@@ -167,7 +167,7 @@ class DuckieTownRNN(gym.Env):
         self.z = next_z
         self.restart = next_restart
         self.rnn_state = next_state
-        #_, reward, _, _ = super(DuckieTownRNN, self)._step(action)
+        # _, reward, _, _ = super(DuckieTownRNN, self)._step(action)
         reward = 1
 
         if self.frame_count >= self.max_frame:
@@ -211,34 +211,34 @@ if __name__ == "__main__":
     parser.add_argument('--temp', default=.01, type=float,
                         help='Control uncertainty')
     args = parser.parse_args()
-    TEMPERATURE = args.temp
-    from pyglet.window import key
-    a = np.array([0.0, 0.0])
+    TEMPERATURE = np.max(args.temp, 0.00001)
+    if env.render_mode:
+        from pyglet.window import key
+    action = np.array([0.0, 0.0])
     overwrite = False
 
     def key_press(k, mod):
-        global overwrite, a
-        overwrite = True
+        global action
         if k == key.UP:
-            a = np.array([0.44, 0.0])
+            action = np.array([0.44, 0.0])
         if k == key.DOWN:
-            a = np.array([-0.44, 0])
+            action = np.array([-0.44, 0])
         if k == key.LEFT:
-            a = np.array([0.35, +1])
+            action = np.array([0.35, +1])
         if k == key.RIGHT:
-            a = np.array([0.35, -1])
+            action = np.array([0.35, -1])
         if k == key.SPACE:
-            a = np.array([0, 0])
+            action = np.array([0, 0])
         if k == key.ESCAPE:
             env.close()
             sys.exit(0)
         # Speed boost
         if k == key.LSHIFT:
-            a *= 1.5
+            action *= 1.5
 
     def key_release(k, mod):
-        a[0] = 0.
-        a[1] = 0.
+        action[0] = 0.
+        action[1] = 0.
 
     env._render()
     env.viewer.window.on_key_press = key_press
@@ -249,32 +249,14 @@ if __name__ == "__main__":
     for i in range(400):
         env._reset()
         total_reward = 0.0
-        steps = 0
 
         repeat = np.random.randint(1, 11)
-        obs_list = []
-        z_list = []
         obs = env._reset()
-        obs_list.append(obs)
-        z_list.append(obs[0:64])
-
-        overwrite = False
 
         while True:
-            action = np.array([.0, .0])
-            # TODO: We need this random actions?
-            #  if steps % repeat == 0:
-            #      action = np.random.uniform(-1., 1., (2,))
-            #      repeat = np.random.randint(1, 11)
-
-            if overwrite:
-                action = a
-
+            print(action)
             obs, reward, done, info = env._step(action)
-            obs_list.append(obs)
-            z_list.append(obs[0:64])
             total_reward += reward
-            steps += 1
 
             if env.render_mode:
                 env._render()

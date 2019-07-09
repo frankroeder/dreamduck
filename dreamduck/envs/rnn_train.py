@@ -3,8 +3,9 @@ import os
 import json
 import random
 import time
+import tensorflow as tf
 
-from rnn.rnn import reset_graph, HyperParams, MDNRNN
+from rnn.rnn import reset_graph, HyperParams, MDNRNN, get_pi_idx
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 np.set_printoptions(precision=4, edgeitems=6, linewidth=100, suppress=True)
@@ -157,7 +158,7 @@ with open(os.path.join("tf_initial_z", "initial_z.json"), 'wt') as outfile:
               sort_keys=True, indent=0, separators=(',', ': '))
 
 reset_graph()
-model = MDNRNN(hps_model)
+model = MDNRNN(hps_model, gpu_mode=tf.test.is_gpu_available())
 
 hps = hps_model
 start = time.time()
@@ -207,6 +208,7 @@ for epoch in range(1, 401):
             output_log = "step: %d, lr: %.6f, cost: %.4f, z_cost: %.4f, r_cost: %.4f, train_time_taken: %.4f" % (
                 step, curr_learning_rate, train_cost, z_cost, r_cost, time_taken)
             print(output_log)
+
 
 # save the model (don't bother with tf checkpoints json all the way ...)
 model.save_json(os.path.join(model_save_path, "rnn.json"))
