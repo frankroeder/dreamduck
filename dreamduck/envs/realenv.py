@@ -185,16 +185,16 @@ class DuckieTownReal(DuckieTownWrapper):
             vae_img = resize(self._decode(self.z), (64, 64))
 
             img = vae_img
+            WINDOW_WIDTH = 800
+            WINDOW_HEIGHT = 600
             if DEBUG:
                 check_img = resize(self._decode(self.check_obs), (64, 64))
                 img = np.concatenate((small_img, vae_img, check_img), axis=1)
-                WINDOW_WIDTH = 1600
+                WINDOW_WIDTH = 1200
             if mode == 'rgb_array':
                 return img
             elif mode == 'human':
                 # original window size
-                WINDOW_WIDTH = 800
-                WINDOW_HEIGHT = 600
                 from pyglet import gl, window, image
                 if self.window is None:
                     config = gl.Config(double_buffer=False)

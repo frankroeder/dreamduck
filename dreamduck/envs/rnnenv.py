@@ -211,7 +211,7 @@ if __name__ == "__main__":
     parser.add_argument('--temp', default=.01, type=float,
                         help='Control uncertainty')
     args = parser.parse_args()
-    TEMPERATURE = np.max(args.temp, 0.00001)
+    TEMPERATURE = args.temp
     if env.render_mode:
         from pyglet.window import key
     action = np.array([0.0, 0.0])
@@ -232,9 +232,6 @@ if __name__ == "__main__":
         if k == key.ESCAPE:
             env.close()
             sys.exit(0)
-        # Speed boost
-        if k == key.LSHIFT:
-            action *= 1.5
 
     def key_release(k, mod):
         action[0] = 0.
@@ -249,12 +246,10 @@ if __name__ == "__main__":
     for i in range(400):
         env._reset()
         total_reward = 0.0
-
         repeat = np.random.randint(1, 11)
         obs = env._reset()
 
         while True:
-            print(action)
             obs, reward, done, info = env._step(action)
             total_reward += reward
 
