@@ -188,6 +188,7 @@ class DuckieTownReal(DuckieTownWrapper):
             if DEBUG:
                 check_img = resize(self._decode(self.check_obs), (64, 64))
                 img = np.concatenate((small_img, vae_img, check_img), axis=1)
+                WINDOW_WIDTH = 1600
             if mode == 'rgb_array':
                 return img
             elif mode == 'human':

@@ -60,8 +60,8 @@ raw_data_mu = raw_data["mu"]
 raw_data_logvar = raw_data["logvar"]
 raw_data_action = raw_data["action"]
 raw_data_restart = raw_data["restart"]
-#raw_data_reward = raw_data["reward"]
-#raw_data_reward = (raw_data_reward - raw_data_reward.min()) / \
+# raw_data_reward = raw_data["reward"]
+# raw_data_reward = (raw_data_reward - raw_data_reward.min()) / \
 #    (raw_data_reward.max() - raw_data_reward.min()) * 2. + (-1.)
 
 
@@ -72,7 +72,7 @@ def load_series_data():
         mu = raw_data_mu[i]
         logvar = raw_data_logvar[i]
         restart = raw_data_restart[i]
-        #reward = raw_data_reward[i]
+        # reward = raw_data_reward[i]
         all_data.append([mu, logvar, action, restart])
     return all_data
 
@@ -95,7 +95,7 @@ def create_batches(all_data, batch_size=100, seq_length=500):
     data_logvar = np.zeros((num_frames, N_z), dtype=np.float16)
     data_action = np.zeros((num_frames, 2), dtype=np.float16)
     data_restart = np.zeros(num_frames, dtype=np.uint8)
-    #data_reward = np.zeros(num_frames, dtype=np.float16)
+    # data_reward = np.zeros(num_frames, dtype=np.float16)
     idx = 0
     for data in all_data:
         mu, logvar, action, restart = data
@@ -104,7 +104,7 @@ def create_batches(all_data, batch_size=100, seq_length=500):
         data_logvar[idx:idx+N] = logvar.reshape(N, 64)
         data_action[idx:idx+N] = action.reshape(N, 2)
         data_restart[idx:idx+N] = restart.reshape(N)
-        #data_reward[idx:idx+N] = reward.reshape(N)
+        # data_reward[idx:idx+N] = reward.reshape(N)
         # data_restart[idx] = 1
         idx += N
 
@@ -112,7 +112,7 @@ def create_batches(all_data, batch_size=100, seq_length=500):
     data_logvar = data_logvar[0:num_frames_adjusted]
     data_action = data_action[0:num_frames_adjusted]
     data_restart = data_restart[0:num_frames_adjusted]
-    #data_reward = data_reward[0:num_frames_adjusted]
+    # data_reward = data_reward[0:num_frames_adjusted]
 
     data_mu = np.split(data_mu.reshape(batch_size, -1, 64), num_batches, 1)
     data_logvar = np.split(data_logvar.reshape(
@@ -121,7 +121,7 @@ def create_batches(all_data, batch_size=100, seq_length=500):
         batch_size, -1, 2), num_batches, 1)
     data_restart = np.split(data_restart.reshape(
         batch_size, -1), num_batches, 1)
-    #data_reward = np.split(data_reward.reshape(
+    # data_reward = np.split(data_reward.reshape(
     #    batch_size, -1), num_batches, 1)
 
     return data_mu, data_logvar, data_action, data_restart
@@ -132,10 +132,10 @@ def get_batch(batch_idx, data_mu, data_logvar, data_action, data_restart):
     batch_logvar = data_logvar[batch_idx]
     batch_action = data_action[batch_idx]
     batch_restart = data_restart[batch_idx]
-    #batch_reward = data_reward[batch_idx]
+    # batch_reward = data_reward[batch_idx]
     batch_s = batch_logvar.shape
     batch_z = batch_mu + np.exp(batch_logvar/2.0) * np.random.randn(*batch_s)
-    return batch_z, batch_action, batch_restart #, batch_reward
+    return batch_z, batch_action, batch_restart  # , batch_reward
 
 
 # process data
@@ -188,7 +188,7 @@ for epoch in range(1, 4000):
         feed = {model.batch_z: batch_z,
                 model.batch_action: batch_action,
                 model.batch_restart: batch_restart,
-                #model.batch_reward: batch_reward,
+                # model.batch_reward: batch_reward,
                 model.initial_state: batch_state,
                 model.lr: curr_learning_rate}
 
@@ -208,10 +208,8 @@ for epoch in range(1, 4000):
             output_log = "step: %d, lr: %.6f, cost: %.4f, z_cost: %.4f, r_cost: %.4f, train_time_taken: %.4f" % (
                 step, curr_learning_rate, train_cost, z_cost, r_cost, time_taken)
             print(output_log)
-        if step % 250 == 0 and step > 0:
-            model.save_json(os.path.join(
-                model_save_path, "rnn{}.json".format(step)
-            )
+    if epoch % 25 == 0:
+        model.save_json(os.path.join(model_save_path, "rnn{}.json".format(epoch)))
 
 
 # save the model (don't bother with tf checkpoints json all the way ...)
