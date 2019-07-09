@@ -7,7 +7,7 @@ import json
 np.set_printoptions(precision=4, edgeitems=6, linewidth=100, suppress=True)
 
 rnn_model_path_name = 'dreamduck/envs/tf_rnn/'
-model_rnn_size = 512
+model_rnn_size = 256
 model_num_mixture = 5
 model_restart_factor = 10.
 
@@ -50,7 +50,7 @@ def default_hps():
                        # factor of importance for restart=1 rare case for loss.
                        restart_factor=model_restart_factor,
                        learning_rate=0.001,
-                       decay_rate=0.99999,
+                       decay_rate=1.0,
                        min_learning_rate=0.00001,
                        # set this to 1 to get more stable results (less chance of NaN), but slower
                        use_layer_norm=0,

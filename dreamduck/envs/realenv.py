@@ -101,7 +101,7 @@ class DuckieTownReal(DuckieTownWrapper):
         OUTWIDTH = self.outwidth
 
         # adjust temperatures
-        temperature = 0
+        temperature = 0.1
         logmix2 = np.copy(logmix)/temperature
         logmix2 -= logmix2.max()
         logmix2 = np.exp(logmix2)
