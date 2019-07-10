@@ -78,13 +78,10 @@ def random_batch():
     z = mu + np.exp(logvar/2.0) * np.random.randn(*s)
     return z, action
 
-<<<<<<< HEAD
   return HyperParams(num_steps=5000,
-=======
 
 def default_hps():
   return HyperParams(num_steps=4000,
->>>>>>> bbebe4b02f06aac7615adc0deb9cf6449d88c8a2
 
                      max_seq_len=499, # train on sequences of 1000 (so 999 + teacher forcing shift)
 
@@ -238,18 +235,15 @@ for local_step in range(hps.num_steps):
   step = rnn.sess.run(rnn.global_step)
 
   curr_learning_rate = (hps.learning_rate-hps.min_learning_rate) * (hps.decay_rate) ** step + hps.min_learning_rate
-<<<<<<< HEAD
   
   idx = np.random.choice(range(num_batches))
   raw_z, raw_a = get_batch(idx, data_mu, data_logvar, data_action)
   
-=======
 
   idx = np.random.choice(range(batch_size))
   raw_z, raw_a = get_batch(idx, data_mu, data_logvar, data_action)
 
   print(raw_z.shape)
->>>>>>> bbebe4b02f06aac7615adc0deb9cf6449d88c8a2
   inputs = np.concatenate((raw_z[:, :-1, :], raw_a[:, :-1, :]), axis=2)
 
   outputs = raw_z[:, 1:, :] # teacher forcing (shift by one predictions)

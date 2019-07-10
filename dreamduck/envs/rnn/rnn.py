@@ -9,8 +9,10 @@ import tensorflow as tf
 
 # hyperparameters for our model. I was using an older tf version, when HParams was not available ...
 
+rnn_model_path_name = 'dreamduck/envs/tf_rnn/'
+model_rnn_size=512
 
-
+model_state_space = 2
 # controls whether we concatenate (z, c, h), etc for features used for car.
 
 MODE_ZCH = 0
@@ -68,12 +70,8 @@ HyperParams = namedtuple('HyperParams', ['num_steps',
 
 
 def default_hps():
-<<<<<<< HEAD
 
   return HyperParams(num_steps=5000, # train model for 2000 steps.
-=======
-  return HyperParams(num_steps=2000, # train model for 2000 steps.
->>>>>>> bbebe4b02f06aac7615adc0deb9cf6449d88c8a2
 
                      max_seq_len=500, # train on sequences of 100
 
@@ -631,6 +629,12 @@ def rnn_output_size(mode):
 
 
 
+def reset_graph():
+    if 'sess' in globals() and sess:
+        sess.close()
+    tf.reset_default_graph()
+    
+    
 def rnn_output(state, z, mode):
 
   if mode == MODE_ZCH:

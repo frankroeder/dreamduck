@@ -7,7 +7,7 @@ from gym import spaces
 from gym.spaces.box import Box
 from dreamduck.envs.env import DuckieTownWrapper
 from dreamduck.envs.rnn.rnn import reset_graph, rnn_model_path_name, \
-    model_rnn_size, model_state_space, MDNRNN, hps_sample, get_pi_idx
+    model_rnn_size, MDNRNN, hps_sample, get_pi_idx, model_state_space
 from dreamduck.envs.vae.vae import ConvVAE, vae_model_path_name
 import os
 from cv2 import resize
@@ -43,17 +43,18 @@ class DuckieTownReal(DuckieTownWrapper):
 
         if load_model:
             self.vae.load_json(os.path.join(vae_model_path_name, 'vae.json'))
-            self.rnn.load_json(os.path.join(rnn_model_path_name, 'rnn25.json'))
+            self.rnn.load_json(os.path.join(rnn_model_path_name, 'rnn.json'))
 
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,))
-        self.outwidth = self.rnn.hps.seq_width
+        self.outwidth = self.rnn.hps.output_seq_width
         self.obs_size = self.outwidth + model_rnn_size*model_state_space
         self.observation_space = Box(
             low=-50., high=50., shape=(self.obs_size,))
 
-        self.zero_state = self.rnn.sess.run(self.rnn.zero_state)
+        self.zero_state = self.rnn.sess.run(self.rnn.initial_state)
         self._seed()
 
+        self.temperature = 2.0
         self.rnn_state = None
         self.z = None
         self.restart = None
@@ -71,29 +72,20 @@ class DuckieTownReal(DuckieTownWrapper):
 
         prev_action = np.reshape(action, (1, 1, 2))
 
-        prev_restart = np.ones((1, 1))
-        prev_restart[0] = self.restart
-
+        input_x = np.concatenate((prev_z, prev_action), axis=2)
         #prev_reward = np.ones((1, 1))
         # TODO: Is this right? If yes remove comment
         #prev_reward[0][0] = self.reward
 
         s_model = self.rnn
+        
+        feed = {s_model.input_x: input_x, s_model.initial_state:self.rnn_state}
+        
 
-        feed = {s_model.input_z: prev_z,
-                s_model.input_action: prev_action,
-                s_model.input_restart: prev_restart,
-                #s_model.input_reward: prev_reward,
-                s_model.initial_state: self.rnn_state
-                }
-
-        #  self.rnn_state = s_model.sess.run(s_model.final_state, feed)
-        [logmix, mean, logstd, logrestart, next_state] = \
+        [logmix, mean, logstd, next_state] = \
             s_model.sess.run([s_model.out_logmix,
                               s_model.out_mean,
                               s_model.out_logstd,
-                              s_model.out_restart_logits,
-                              # s_model.reward_logits,
                               s_model.final_state],
                              feed)
 
@@ -101,7 +93,7 @@ class DuckieTownReal(DuckieTownWrapper):
         OUTWIDTH = self.outwidth
 
         # adjust temperatures
-        temperature = 0.01
+        temperature = self.temperature
         logmix2 = np.copy(logmix)/temperature
         logmix2 -= logmix2.max()
         logmix2 = np.exp(logmix2)
