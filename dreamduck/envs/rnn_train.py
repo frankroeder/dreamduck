@@ -72,15 +72,15 @@ def random_batch():
 
 def default_hps():
 
-  return HyperParams(num_steps=4000,
+  return HyperParams(num_steps=5000,
 
-                     max_seq_len=999, # train on sequences of 1000 (so 999 + teacher forcing shift)
+                     max_seq_len=499, # train on sequences of 1000 (so 999 + teacher forcing shift)
 
-                     input_seq_width=35,    # width of our data (32 + 3 actions)
+                     input_seq_width=66,    # width of our data (32 + 3 actions)
 
-                     output_seq_width=32,    # width of our data is 32
+                     output_seq_width=64,    # width of our data is 32
 
-                     rnn_size=256,    # number of rnn cells
+                     rnn_size=512,    # number of rnn cells
 
                      batch_size=100,   # minibatch sizes
 
@@ -153,7 +153,7 @@ def create_batches(all_data, batch_size=100, seq_length=500):
     data_action = np.zeros((num_frames, 2), dtype=np.float16)
     idx = 0
     for data in all_data:
-        mu, logvar, action, restart = data
+        mu, logvar, action = data
         N = len(action)
         data_mu[idx:idx+N] = mu.reshape(N, 64)
         data_logvar[idx:idx+N] = logvar.reshape(N, 64)
@@ -232,10 +232,9 @@ for local_step in range(hps.num_steps):
 
   curr_learning_rate = (hps.learning_rate-hps.min_learning_rate) * (hps.decay_rate) ** step + hps.min_learning_rate
   
-  idx = np.random.choice(range(batch_size))
+  idx = np.random.choice(range(num_batches))
   raw_z, raw_a = get_batch(idx, data_mu, data_logvar, data_action)
   
-  print(raw_z.shape) 
   inputs = np.concatenate((raw_z[:, :-1, :], raw_a[:, :-1, :]), axis=2)
 
   outputs = raw_z[:, 1:, :] # teacher forcing (shift by one predictions)

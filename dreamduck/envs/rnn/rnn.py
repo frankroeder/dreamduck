@@ -70,15 +70,15 @@ HyperParams = namedtuple('HyperParams', ['num_steps',
 
 def default_hps():
 
-  return HyperParams(num_steps=2000, # train model for 2000 steps.
+  return HyperParams(num_steps=5000, # train model for 2000 steps.
 
-                     max_seq_len=1000, # train on sequences of 100
+                     max_seq_len=500, # train on sequences of 100
 
                      input_seq_width=66,    # width of our data (32 + 3 actions)
 
                      output_seq_width=64,    # width of our data is 32
 
-                     rnn_size=256,    # number of rnn cells
+                     rnn_size=512,    # number of rnn cells
 
                      batch_size=100,   # minibatch sizes
 
