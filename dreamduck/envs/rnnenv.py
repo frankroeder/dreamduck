@@ -12,7 +12,6 @@ import os
 from gym.utils import seeding
 from cv2 import resize
 import tensorflow as tf
-import gym
 
 SCREEN_X = 64
 SCREEN_Y = 64
@@ -20,10 +19,9 @@ TEMPERATURE = 0.001
 
 model_path_name = 'dreamduck/envs/tf_initial_z'
 
-# Dreaming
-
 
 class DuckieTownRNN(DuckieTownWrapper):
+    """ Dreaming """
     metadata = {
         'render.modes': ['human', 'rgb_array'],
         'video.frames_per_second': 50
@@ -82,7 +80,7 @@ class DuckieTownRNN(DuckieTownWrapper):
             self.np_random.randn(*init_logvar.shape)
         return init_z
 
-   
+
 
     def _reset(self):
         self.temperature = TEMPERATURE
@@ -106,7 +104,7 @@ class DuckieTownRNN(DuckieTownWrapper):
         prev_z[0][0] = self.z
 
         prev_action = np.reshape(action, (1, 1, 2))
-        
+
         input_x = np.concatenate((prev_z, prev_action), axis=2)
 
         # prev_reward = np.ones((1, 1))
@@ -116,7 +114,7 @@ class DuckieTownRNN(DuckieTownWrapper):
         s_model = self.rnn
         temperature = self.temperature
 
-        feed = {s_model.input_x: input_x, s_model.initial_state:self.rnn_state}
+        feed = {s_model.input_x: input_x, s_model.initial_state: self.rnn_state}
 
         [logmix, mean, logstd, next_state] = \
             s_model.sess.run([s_model.out_logmix,
@@ -148,8 +146,8 @@ class DuckieTownRNN(DuckieTownWrapper):
 
         _, reward, done, _ = super(DuckieTownRNN, self)._step(action)
         done = False
-        
-        
+
+
         self.z = next_z
         self.reward = reward
 
