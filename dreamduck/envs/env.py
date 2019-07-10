@@ -46,14 +46,7 @@ class DuckieTownWrapper(DuckietownEnv):
 
 def make_env(env_name, seed=-1, render_mode=True, load_model=True,
              full_episode=True):
-    if env_name == 'default':
-        env = DuckieTownWrapper(full_episode=full_episode)
-    elif env_name == 'rnnenv':
-        from rnnenv import DuckieTownRNN
-        env = DuckieTownRNN(render_mode=render_mode, load_model=load_model)
-    elif env_name == 'realenv':
-        from realenv import DuckieTownReal
-        env = DuckieTownReal(render_mode=render_mode, load_model=load_model)
+    env = DuckieTownWrapper(full_episode=full_episode)
     if seed >= 0:
         env.seed(seed)
     return env

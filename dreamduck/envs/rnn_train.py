@@ -21,7 +21,6 @@ import random
 import time
 
 
-
 from vae.vae import ConvVAE, reset_graph
 
 from rnn.rnn import HyperParams, MDNRNN
@@ -42,7 +41,7 @@ if not os.path.exists(model_save_path):
 
   os.makedirs(model_save_path)
 
-  
+
 
 initial_z_save_path = "tf_initial_z"
 
@@ -70,9 +69,22 @@ def random_batch():
 
 
 
-def default_hps():
+def random_batch():
+    indices = np.random.permutation(N_data)[0:batch_size]
+    mu = data_mu[indices]
+    logvar = data_logvar[indices]
+    action = data_action[indices]
+    s = logvar.shape
+    z = mu + np.exp(logvar/2.0) * np.random.randn(*s)
+    return z, action
 
+<<<<<<< HEAD
   return HyperParams(num_steps=5000,
+=======
+
+def default_hps():
+  return HyperParams(num_steps=4000,
+>>>>>>> bbebe4b02f06aac7615adc0deb9cf6449d88c8a2
 
                      max_seq_len=499, # train on sequences of 1000 (so 999 + teacher forcing shift)
 
@@ -169,7 +181,7 @@ def create_batches(all_data, batch_size=100, seq_length=500):
         batch_size, -1, 64), num_batches, 1)
     data_action = np.split(data_action.reshape(
         batch_size, -1, 2), num_batches, 1)
-    
+
 
     return data_mu, data_logvar, data_action
 
@@ -197,13 +209,9 @@ batch_size = hps_model.batch_size
 
 
 # save 1000 initial mu and logvars:
-initial_mu = []
-initial_logvar = []
-for i in range(1000):
-    mu = np.copy(raw_data_mu[i][0, :]*10000).astype(np.int).tolist()
-    logvar = np.copy(raw_data_logvar[i][0, :]*10000).astype(np.int).tolist()
-    initial_mu.append(mu)
-    initial_logvar.append(logvar)
+initial_mu = np.copy(data_mu[:1000, 0, :]*10000).astype(np.int).tolist()
+initial_logvar = np.copy(
+    data_logvar[:1000, 0, :]*10000).astype(np.int).tolist()
 with open(os.path.join("tf_initial_z", "initial_z.json"), 'wt') as outfile:
     json.dump([initial_mu, initial_logvar], outfile,
               sort_keys=True, indent=0, separators=(',', ': '))
@@ -220,7 +228,6 @@ rnn = MDNRNN(hps_model)
 hps = hps_model
 
 start = time.time()
-
 data_mu, data_logvar, data_action = create_batches(all_data)
 num_batches = len(data_mu)
 
@@ -231,10 +238,18 @@ for local_step in range(hps.num_steps):
   step = rnn.sess.run(rnn.global_step)
 
   curr_learning_rate = (hps.learning_rate-hps.min_learning_rate) * (hps.decay_rate) ** step + hps.min_learning_rate
+<<<<<<< HEAD
   
   idx = np.random.choice(range(num_batches))
   raw_z, raw_a = get_batch(idx, data_mu, data_logvar, data_action)
   
+=======
+
+  idx = np.random.choice(range(batch_size))
+  raw_z, raw_a = get_batch(idx, data_mu, data_logvar, data_action)
+
+  print(raw_z.shape)
+>>>>>>> bbebe4b02f06aac7615adc0deb9cf6449d88c8a2
   inputs = np.concatenate((raw_z[:, :-1, :], raw_a[:, :-1, :]), axis=2)
 
   outputs = raw_z[:, 1:, :] # teacher forcing (shift by one predictions)
@@ -262,6 +277,3 @@ for local_step in range(hps.num_steps):
 # save the model (don't bother with tf checkpoints json all the way ...)
 
 rnn.save_json(os.path.join(model_save_path, "rnn.json"))
-
-
-

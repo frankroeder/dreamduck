@@ -1,21 +1,32 @@
 import numpy as np
 import random
+
 import json
 import sys
-import config
-from env import make_env
-import time
-import os
-from dreamduck.envs.rnn.rnn import rnn_model_path_name
-from dreamduck.envs.vae.vae import vae_model_path_name
 
-final_mode = True
+import os
+from env import make_env
+
+from dreamduck.envs.rnn.rnn import hps_sample, MDNRNN, rnn_init_state, \
+    rnn_next_state, rnn_output, rnn_output_size, rnn_model_path_name
+from dreamduck.envs.vae.vae import ConvVAE, vae_model_path_name
+
 render_mode = True
 RENDER_DELAY = False
 
+# controls whether we concatenate (z, c, h), etc for features used for car.
+MODE_ZCH = 0
+MODE_ZC = 1
+MODE_Z = 2
+MODE_Z_HIDDEN = 2  # extra hidden later
+MODE_ZH = 4
 
-def make_model(game):
-    model = Model(game)
+EXP_MODE = MODE_ZH
+
+
+def make_model(load_model=True):
+    # can be extended in the future.
+    model = Model(load_model=load_model)
     return model
 
 
@@ -25,6 +36,10 @@ def sigmoid(x):
 
 def relu(x):
     return np.maximum(x, 0)
+
+
+def clip(x, lo=0.0, hi=1.0):
+    return np.minimum(np.maximum(x, lo), hi)
 
 
 def passthru(x):
@@ -41,34 +56,33 @@ def sample(p):
 
 
 class Model:
-    ''' simple feedforward model '''
+    def __init__(self, load_model=True):
+        self.env_name = "default"
+        self.vae = ConvVAE(batch_size=1, gpu_mode=False, is_training=False, reuse=True)
 
-    def __init__(self, game):
-        self.action = np.random.uniform(-0.05, 1., (2,))
+        self.rnn = MDNRNN(hps_sample, gpu_mode=False, reuse=True)
 
-        self.noise_level = 0.0
-        self.env_name = game.env_name
+        if load_model:
+            self.vae.load_json(os.path.join(vae_model_path_name, 'vae.json'))
+            self.rnn.load_json(os.path.join(rnn_model_path_name, 'rnn.json'))
 
-        self.input_size = game.input_size
-        self.output_size = game.output_size
+        self.state = rnn_init_state(self.rnn)
+        self.rnn_mode = True
 
-        self.shapes = [(game.input_size, game.output_size)]
+        self.input_size = rnn_output_size(EXP_MODE)
+        self.z_size = 64
 
-        self.sample_output = False
-        if game.activation == 'relu':
-            self.activations = [relu]
-        elif game.activation == 'sigmoid':
-            self.activations = [sigmoid]
-        elif game.activation == 'passthru':
-            self.activations = [np.tanh]
+        if EXP_MODE == MODE_Z_HIDDEN:  # one hidden layer
+            self.hidden_size = 40
+            self.weight_hidden = np.random.randn(self.input_size, self.hidden_size)
+            self.bias_hidden = np.random.randn(self.hidden_size)
+            self.weight_output = np.random.randn(self.hidden_size, 3)
+            self.bias_output = np.random.randn(3)
+            self.param_count = ((self.input_size+1)*self.hidden_size) + (self.hidden_size*3+3)
         else:
-            self.activations = [np.tanh]
-
-        self.weight = []
-        self.param_count = game.input_size * game.output_size
-
-        for shape in self.shapes:
-            self.weight.append(np.zeros(shape=shape))
+            self.weight = np.random.randn(self.input_size, 3)
+            self.bias = np.random.randn(3)
+            self.param_count = (self.input_size)*3+3
 
         self.render_mode = False
 
@@ -78,39 +92,58 @@ class Model:
         self.env = make_env(self.env_name, seed=seed, render_mode=render_mode,
                             load_model=load_model, full_episode=full_episode)
 
+    def reset(self):
+        self.state = rnn_init_state(self.rnn)
+
+    def encode_obs(self, obs):
+        # convert raw obs to z, mu, logvar
+        result = np.copy(obs).astype(np.float)/255.0
+        result = result.reshape(1, 64, 64, 3)
+        mu, logvar = self.vae.encode_mu_logvar(result)
+        mu = mu[0]
+        logvar = logvar[0]
+        s = logvar.shape
+        z = mu + np.exp(logvar/2.0) * np.random.randn(*s)
+        return z, mu, logvar
+
     def get_action(self, z):
-        # generate random actions
-        rand_prob = .01
-        np.random.seed(np.random.randint(10000))
-        t = np.random.uniform(0., 1.)
-
-        if t < rand_prob:
-            self.action = np.random.uniform(-0.05, 1., (2,))
+        h = rnn_output(self.state, z, EXP_MODE)
+        if EXP_MODE == MODE_Z_HIDDEN: # one hidden layer
+            h = np.tanh(np.dot(h, self.weight_hidden) + self.bias_hidden)
+            action = np.tanh(np.dot(h, self.weight_output) + self.bias_output)
         else:
-            self.action += np.random.uniform(-0.1, 0.1, (2,))
+            action = np.tanh(np.dot(h, self.weight) + self.bias)
 
-        action = self.action
-        return action
+        action[1] = (action[1]+1.0) / 2.0
+        action[2] = clip(action[2])
+
+        self.state = rnn_next_state(self.rnn, z, action, self.state)
+
+        return action[:1]
 
     def set_model_params(self, model_params):
-        pointer = 0
-        for i in range(len(self.shapes)):
-            w_shape = self.shapes[i]
-            s_w = np.product(w_shape)
-            s = s_w
-            chunk = np.array(model_params[pointer:pointer+s])
-            self.weight[i] = chunk[:s_w].reshape(w_shape)
-            pointer += s
+        if EXP_MODE == MODE_Z_HIDDEN:  # one hidden layer
+            params = np.array(model_params)
+            cut_off = (self.input_size+1)*self.hidden_size
+            params_1 = params[:cut_off]
+            params_2 = params[cut_off:]
+            self.bias_hidden = params_1[:self.hidden_size]
+            self.weight_hidden = params_1[self.hidden_size:].reshape(
+                self.input_size, self.hidden_size)
+            self.bias_output = params_2[:2]
+            self.weight_output = params_2[2:].reshape(self.hidden_size, 3)
+        else:
+            self.bias = np.array(model_params[:3])
+            self.weight = np.array(
+                model_params[3:]).reshape(self.input_size, 3)
 
     def load_model(self, filename):
         with open(filename) as f:
             data = json.load(f)
         print('loading file %s' % (filename))
         self.data = data
-        model_params = np.array(data[0])
+        model_params = np.array(data[0])  # assuming other stuff is in data
         self.set_model_params(model_params)
-        self.env.vae.load_json(os.path.join(vae_model_path_name, 'vae.json'))
-        self.env.rnn.load_json(os.path.join(rnn_model_path_name, 'rnn.json'))
 
     def get_random_model_params(self, stdev=0.1):
         return np.random.standard_cauchy(self.param_count)*stdev
@@ -118,29 +151,19 @@ class Model:
     def init_random_model_params(self, stdev=0.1):
         params = self.get_random_model_params(stdev=stdev)
         self.set_model_params(params)
-        vae_params = self.env.vae.get_random_model_params(stdev=stdev)
-        self.env.vae.set_model_params(vae_params)
-        rnn_params = self.env.rnn.get_random_model_params(stdev=stdev)
-        self.env.rnn.set_model_params(rnn_params)
-
-
-def evaluate(model):
-    # run 100 times and average score, according to the reles.
-    model.env.seed(0)
-    total_reward = 0.0
-    N = 100
-    for i in range(N):
-        reward, t = simulate(model, train_mode=False,
-                             render_mode=False, num_episode=1)
-        total_reward += reward[0]
-    return (total_reward / float(N))
+        vae_params = self.vae.get_random_model_params(stdev=stdev)
+        self.vae.set_model_params(vae_params)
+        rnn_params = self.rnn.get_random_model_params(stdev=stdev)
+        self.rnn.set_model_params(rnn_params)
 
 
 def simulate(model, train_mode=False, render_mode=True, num_episode=5, seed=-1, max_len=-1):
+
     reward_list = []
     t_list = []
-    # TODO: Change
-    max_episode_length = 2100
+
+    max_episode_length = 1000
+    penalize_turning = False
 
     if train_mode and max_len > 0:
         max_episode_length = max_len
@@ -151,37 +174,33 @@ def simulate(model, train_mode=False, render_mode=True, num_episode=5, seed=-1, 
         model.env.seed(seed)
 
     for episode in range(num_episode):
-        obs = model.env._reset()
-
-        if obs is None:
-            obs = np.zeros(model.input_size)
-
+        model.reset()
+        obs = model.env.reset()
         total_reward = 0.0
 
         for t in range(max_episode_length):
 
             if render_mode:
-                model.env._render("human")
-                if RENDER_DELAY:
-                    time.sleep(0.01)
+                model.env.render("human")
+            else:
+                model.env.render('rgb_array')
 
-            action = model.get_action(obs)
-            #  prev_obs = obs
-            obs, reward, done, info = model.env._step(action)
+            z, mu, logvar = model.encode_obs(obs)
+            action = model.get_action(z)
+            obs, reward, done, info = model.env.step(action)
+            extra_reward = 0.0 # penalize for turning too frequently
 
-            if (render_mode):
-                pass
-                # print("action", action, "step reward", reward)
-                # print("step reward", reward)
+            if train_mode and penalize_turning:
+                extra_reward -= np.abs(action[0])/10.0
+                reward += extra_reward
+
             total_reward += reward
 
             if done:
                 break
 
         if render_mode:
-            print("reward", total_reward, "timesteps", t)
-            model.env.close()
-
+            print("total reward", total_reward, "timesteps", t)
         reward_list.append(total_reward)
         t_list.append(t)
 
@@ -190,65 +209,50 @@ def simulate(model, train_mode=False, render_mode=True, num_episode=5, seed=-1, 
 
 def main():
 
-    global RENDER_DELAY
-    global final_mode
+    assert len(sys.argv) > 1, 'python model.py render/norender path_to_mode.json [seed]'
 
-    assert len(
-        sys.argv) > 2, \
-        'python model.py gamename render/norender path_to_model.json [seed]'
-
-    gamename = sys.argv[1]
-
-    game = config.games[gamename]
-
-    final_mode_string = str(sys.argv[2])
-    if (final_mode_string == "render"):
-        final_mode = False
+    render_mode_string = str(sys.argv[1])
+    if (render_mode_string == "render"):
+        render_mode = True
+    else:
+        render_mode = False
 
     use_model = False
-    if (len(sys.argv) > 3):
+    if len(sys.argv) > 2:
         use_model = True
-        filename = sys.argv[3]
+        filename = sys.argv[2]
         print("filename", filename)
 
     the_seed = np.random.randint(10000)
-    if len(sys.argv) > 4:
-        the_seed = int(sys.argv[4])
+    if len(sys.argv) > 3:
+        the_seed = int(sys.argv[3])
         print("seed", the_seed)
 
-    model = make_model(game)
-    print('model size', model.param_count)
-
     if (use_model):
+        model = make_model()
+        print('model size', model.param_count)
         model.make_env(render_mode=render_mode)
         model.load_model(filename)
     else:
-        model.make_env(render_mode=render_mode, load_model=False)
-        if gamename != 'default':
-            model.init_random_model_params(stdev=np.random.rand()*0.01)
+        model = make_model(load_model=False)
+        print('model size', model.param_count)
+        model.make_env(render_mode=render_mode)
+        model.init_random_model_params(stdev=np.random.rand()*0.01)
 
-    if final_mode:
-        total_reward = 0.0
-        np.random.seed(the_seed)
-        model.env.seed(the_seed)
-        reward_list = []
-
-        for i in range(100):
-            reward, steps_taken = simulate(
-                model, train_mode=False, render_mode=False, num_episode=1)
-            print("iteration", i, "reward", reward[0])
-            total_reward += reward[0]
-            reward_list.append(reward[0])
-        print("seed", the_seed, "average_reward",
-              total_reward/100, "stdev", np.std(reward_list))
-
-    else:
-
-        reward, steps_taken = simulate(model,
-                                       train_mode=False, render_mode=render_mode, num_episode=1)
-        print("terminal reward", reward,
-              "average steps taken", np.mean(steps_taken)+1)
-
+    N_episode = 100
+    if render_mode:
+        N_episode = 1
+    reward_list = []
+    for i in range(N_episode):
+        reward, steps_taken = simulate(
+            model, train_mode=False, render_mode=render_mode, num_episode=1)
+        if render_mode:
+            print("terminal reward", reward, "average steps taken", np.mean(steps_taken)+1)
+        else:
+            print(reward[0])
+        reward_list.append(reward[0])
+    if not render_mode:
+        print("seed", the_seed, "average_reward", np.mean(reward_list), "stdev", np.std(reward_list))
 
 if __name__ == "__main__":
     main()

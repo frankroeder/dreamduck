@@ -1,5 +1,4 @@
 import numpy as np
-
 from collections import namedtuple
 
 import json
@@ -69,8 +68,12 @@ HyperParams = namedtuple('HyperParams', ['num_steps',
 
 
 def default_hps():
+<<<<<<< HEAD
 
   return HyperParams(num_steps=5000, # train model for 2000 steps.
+=======
+  return HyperParams(num_steps=2000, # train model for 2000 steps.
+>>>>>>> bbebe4b02f06aac7615adc0deb9cf6449d88c8a2
 
                      max_seq_len=500, # train on sequences of 100
 
@@ -115,13 +118,11 @@ hps_model = default_hps()
 hps_sample = hps_model._replace(batch_size=1, max_seq_len=1, use_recurrent_dropout=0, is_training=0)
 
 
-
 # MDN-RNN model
 
 class MDNRNN():
 
   def __init__(self, hps, gpu_mode=True, reuse=False):
-
     self.hps = hps
 
     with tf.variable_scope('mdn_rnn', reuse=reuse):
@@ -152,18 +153,14 @@ class MDNRNN():
 
   def build_model(self, hps):
 
-    
-
     self.num_mixture = hps.num_mixture
 
     KMIX = self.num_mixture # 5 mixtures
-
     INWIDTH = hps.input_seq_width # 35 channels
 
     OUTWIDTH = hps.output_seq_width # 32 channels
 
     LENGTH = self.hps.max_seq_len # 1000 timesteps
-
 
 
     if hps.is_training:
@@ -232,7 +229,7 @@ class MDNRNN():
 
     actual_input_x = self.input_x
 
-    self.initial_state = cell.zero_state(batch_size=hps.batch_size, dtype=tf.float32) 
+    self.initial_state = cell.zero_state(batch_size=hps.batch_size, dtype=tf.float32)
 
 
 
@@ -260,7 +257,7 @@ class MDNRNN():
 
     output = tf.reshape(output, [-1, KMIX * 3])
 
-    self.final_state = last_state    
+    self.final_state = last_state
 
 
 
@@ -340,7 +337,7 @@ class MDNRNN():
 
     self.init = tf.global_variables_initializer()
 
-    
+
 
     t_vars = tf.trainable_variables()
 
@@ -358,7 +355,7 @@ class MDNRNN():
 
       self.assign_ops[var] = (assign_op, pl)
 
-    
+
 
   def init_session(self):
 
@@ -502,7 +499,7 @@ def sample_sequence(sess, s_model, hps, init_z, actions, temperature=1.0, seq_le
 
   # generates a random sequence using the trained model
 
-  
+
 
   OUTWIDTH = hps.output_seq_width
 
