@@ -47,7 +47,7 @@ class DuckieTownReal(DuckieTownWrapper):
 
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,))
         self.outwidth = self.rnn.hps.output_seq_width
-        self.obs_size = self.outwidth + model_rnn_size*model_state_space
+        self.obs_size = self.outwidth #+ model_rnn_size*model_state_space
         self.observation_space = Box(
             low=-50., high=50., shape=(self.obs_size,))
 

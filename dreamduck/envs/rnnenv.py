@@ -16,14 +16,14 @@ import gym
 
 SCREEN_X = 64
 SCREEN_Y = 64
-TEMPERATURE = 1.25
+TEMPERATURE = 0.001
 
 model_path_name = 'dreamduck/envs/tf_initial_z'
 
 # Dreaming
 
 
-class DuckieTownRNN(gym.Env):
+class DuckieTownRNN(DuckieTownWrapper):
     metadata = {
         'render.modes': ['human', 'rgb_array'],
         'video.frames_per_second': 50
@@ -50,19 +50,19 @@ class DuckieTownRNN(gym.Env):
 
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,))
 
-        self.outwidth = self.rnn.hps.seq_width
-        self.obs_size = self.outwidth + model_rnn_size*model_state_space
+        self.outwidth = self.rnn.hps.output_seq_width
+        self.obs_size = self.outwidth #+ model_rnn_size*model_state_space
 
         self.observation_space = Box(
             low=-50., high=50., shape=(self.obs_size,))
 
-        self.zero_state = self.rnn.sess.run(self.rnn.zero_state)
+        self.zero_state = self.rnn.sess.run(self.rnn.initial_state)
         self._seed()
 
         self.rnn_state = None
         self.z = None
         self.restart = None
-        self.temperature = None
+        self.temperature = 0.001
         self.frame_count = None
         self.viewer = None
 
@@ -82,12 +82,7 @@ class DuckieTownRNN(gym.Env):
             self.np_random.randn(*init_logvar.shape)
         return init_z
 
-    def _current_state(self):
-        if model_state_space == 2:
-            return np.concatenate([
-                self.z, self.rnn_state.c.flatten(), self.rnn_state.h.flatten()
-            ], axis=0)
-        return np.concatenate([self.z, self.rnn_state.h.flatten()], axis=0)
+   
 
     def _reset(self):
         self.temperature = TEMPERATURE
@@ -95,7 +90,7 @@ class DuckieTownRNN(gym.Env):
         self.z = self._sample_init_z()
         self.restart = 1
         self.frame_count = 0
-        return self._current_state()
+        return self.z
 
     def _seed(self, seed=None):
         if seed:
@@ -111,9 +106,8 @@ class DuckieTownRNN(gym.Env):
         prev_z[0][0] = self.z
 
         prev_action = np.reshape(action, (1, 1, 2))
-
-        prev_restart = np.ones((1, 1))
-        prev_restart[0] = self.restart
+        
+        input_x = np.concatenate((prev_z, prev_action), axis=2)
 
         # prev_reward = np.ones((1, 1))
         # TODO: Is this right? If yes remove comment
@@ -122,22 +116,16 @@ class DuckieTownRNN(gym.Env):
         s_model = self.rnn
         temperature = self.temperature
 
-        feed = {s_model.input_z: prev_z,
-                s_model.input_action: prev_action,
-                s_model.input_restart: prev_restart,
-                # s_model.input_reward: prev_reward,
-                s_model.initial_state: self.rnn_state
-                }
+        feed = {s_model.input_x: input_x, s_model.initial_state:self.rnn_state}
 
-        [logmix, mean, logstd, logrestart, next_state] = \
+        [logmix, mean, logstd, next_state] = \
             s_model.sess.run([s_model.out_logmix,
                               s_model.out_mean,
                               s_model.out_logstd,
-                              s_model.out_restart_logits,
-                              # s_model.reward_logits,
                               s_model.final_state],
                              feed)
 
+        self.rnn_state = next_state
         OUTWIDTH = self.outwidth
 
         # adjust temperatures
@@ -158,22 +146,22 @@ class DuckieTownRNN(gym.Env):
         rand_gaussian = self.np_random.randn(OUTWIDTH)*np.sqrt(temperature)
         next_z = chosen_mean+np.exp(chosen_logstd) * rand_gaussian
 
-        next_restart = 0
+        _, reward, done, _ = super(DuckieTownRNN, self)._step(action)
         done = False
-        if (logrestart[0] > 0):
-            next_restart = 1
-            done = True
-
+        
+        
         self.z = next_z
-        self.restart = next_restart
-        self.rnn_state = next_state
-        # _, reward, _, _ = super(DuckieTownRNN, self)._step(action)
-        reward = 1
+        self.reward = reward
+
+        if done:
+            self.restart = 1
+        else:
+            self.restart = 0
 
         if self.frame_count >= self.max_frame:
             done = True
 
-        return self._current_state(), reward, done, {}
+        return next_z, reward, done, {}
 
     def _get_image(self, upsize=False):
         img = self.vae.decode(self.z.reshape(1, 64)) * 255.
@@ -208,7 +196,7 @@ if __name__ == "__main__":
 
     env = DuckieTownRNN(render_mode=True)
     parser = argparse.ArgumentParser()
-    parser.add_argument('--temp', default=.01, type=float,
+    parser.add_argument('--temp', default=.001, type=float,
                         help='Control uncertainty')
     args = parser.parse_args()
     TEMPERATURE = args.temp
