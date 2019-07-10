@@ -43,7 +43,7 @@ class DuckieTownReal(DuckieTownWrapper):
 
         if load_model:
             self.vae.load_json(os.path.join(vae_model_path_name, 'vae.json'))
-            self.rnn.load_json(os.path.join(rnn_model_path_name, 'rnn.json'))
+            self.rnn.load_json(os.path.join(rnn_model_path_name, 'rnn25.json'))
 
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,))
         self.outwidth = self.rnn.hps.seq_width
@@ -101,7 +101,7 @@ class DuckieTownReal(DuckieTownWrapper):
         OUTWIDTH = self.outwidth
 
         # adjust temperatures
-        temperature = 0.1
+        temperature = 0.01
         logmix2 = np.copy(logmix)/temperature
         logmix2 -= logmix2.max()
         logmix2 = np.exp(logmix2)
