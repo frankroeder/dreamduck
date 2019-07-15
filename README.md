@@ -89,4 +89,4 @@ instruction.
 
 ## Authors
 
-[Frank Röder](https://frankyroeder.de) & Shahd Safarani
+[Frank Röder](https://frankyroeder.de) & [Shahd Safarani](https://github.com/Shahdsaf)
