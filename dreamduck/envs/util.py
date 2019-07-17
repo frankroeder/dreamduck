@@ -4,15 +4,6 @@ from cv2 import resize
 SCREEN_X = 64
 SCREEN_Y = 64
 
-
-def norm_reward(reward):
-    return scale(reward, (-1000., 1000.), (-1.0, +1.0))
-
-
-def scale(val, src, dst):
-    return ((val - src[0]) / (src[1]-src[0])) * (dst[1]-dst[0]) + dst[0]
-
-
 def _process_frame(frame):
     obs = frame[:, :, :].astype(np.float)/255.0
     obs = np.array(resize(obs, (SCREEN_X, SCREEN_Y)))

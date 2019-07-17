@@ -13,7 +13,7 @@ import os
 from cv2 import resize
 from gym.utils import seeding
 import tensorflow as tf
-from dreamduck.envs.util import _process_frame, norm_reward
+from dreamduck.envs.util import _process_frame
 
 SCREEN_X = 64
 SCREEN_Y = 64
@@ -100,7 +100,6 @@ class DuckieTownReal(DuckieTownWrapper):
         small_obs = _process_frame(obs)
         self.current_obs = small_obs
         self.z = self._encode(small_obs)
-        reward = norm_reward(reward)
 
         if DEBUG:
             print('DIST', np.linalg.norm(self.z-prev_z), 'DONE:', done)
@@ -253,7 +252,6 @@ if __name__ == "__main__":
         if key_handler[key.LSHIFT]:
             action *= 1.5
         obs, reward, done, info = env._step(action)
-        reward = norm_reward(reward)
         print('step_count = %s, reward=%.3f' %
               (env.unwrapped.step_count, reward))
 

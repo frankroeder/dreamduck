@@ -137,7 +137,9 @@ class DuckieTownRNN(gym.Env):
         done = True if np.linalg.norm(self.z-prev_z) > 11.75 else False
 
         if done:
-            reward = -1
+            reward = -1.
+        elif action[0] > 0:
+            reward = 1.
         else:
             reward = np.random.uniform(0, 1)
 

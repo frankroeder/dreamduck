@@ -5,7 +5,7 @@ from pyglet.window import key
 import argparse
 from gym.spaces.box import Box
 from gym_duckietown.envs import DuckietownEnv
-from dreamduck.envs.util import _process_frame, norm_reward
+from dreamduck.envs.util import _process_frame
 
 SCREEN_X = 64
 SCREEN_Y = 64
@@ -28,7 +28,6 @@ class DuckieTownWrapper(DuckietownEnv):
         obs, reward, done, _ = super(DuckieTownWrapper, self).step(action)
         if self.full_episode:
             return _process_frame(obs), reward, False, {}
-        reward = norm_reward(reward)
         return _process_frame(obs), reward, done, {}
 
 
@@ -96,7 +95,6 @@ if __name__ == "__main__":
         if key_handler[key.LSHIFT]:
             action *= 1.5
         obs, reward, done, info = env.step(action)
-        reward = norm_reward(reward)
         print('step_count = %s, reward=%.10f' %
               (env.unwrapped.step_count, reward))
 
